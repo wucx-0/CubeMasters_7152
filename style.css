@@ -4,6 +4,9 @@
     --clr-dark: black;
     --clr-light: white;
     --clr-accent: red;
+    --clr-background: linear-gradient(180deg, rgba(169, 202, 255, 1.000) 0.000%, rgba(184, 203, 255, 1.000) 16.667%,
+    rgba(211, 203, 255, 1.000) 33.333%, rgba(240, 200, 249, 1.000) 50.000%, rgba(255, 197, 241, 1.000) 66.667%,
+    rgba(255, 192, 236, 1.000) 83.333%, rgba(255, 186, 236, 1.000) 100.000%);
 }
 
 *,
@@ -27,21 +30,23 @@ body {
 }
 
 .container {
-    width: 80%;
-    height: 700px;
+    width: 100%;
+    height: 100%;
     margin: 0 auto;
-    border: 10px solid var(--clr-dark);
+    /*border: 10px solid lightblue;*/
+    background: var(--clr-background);
+    padding: 10px;
 }
 
 .item {
     width: 150px;
-    height: 150px;
-    background-color: lightcoral;
-    padding: 1em;
+    height: 50px;
+    background-color: transparent;
+    padding: 5px;
     font-weight: 700;
     color: var(--clr-light);
     text-align: center;
-    border: 10px solid var(--clr-accent);
+    border: 2px solid lightslategrey;
     border-radius: 10px;
 }
 
@@ -49,12 +54,22 @@ body {
 
 .container {
     display: flex;
-    /*flex-direction: row;
-    justify-content: flex-start;*/
+    flex-direction: column;
+    /*justify-content: flex-start;*/
+    align-items: flex-start;
+    /*flex-wrap: wrap;*/
+    /*align-content: flex-start;*/
+    /*gap: 1em;*/
+}
+
+.navbar {
+    display: flex;
+    flex-direction: column;
+    /*justify-content: flex-start;*/
     align-items: flex-start;
     /*flex-wrap: wrap;
-    align-content: flex-start;
-    gap: 1em;*/
+    align-content: flex-start;*/
+    gap: 1em;
 }
 
 .item-1 {
@@ -65,30 +80,4 @@ body {
     /*align-self: flex-end;*/ /*override align-items in container*/
     /*order: -1;*/ /*override order in which items appear, all items 0 by default, shdnt use unless necessary*/
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
