@@ -1,0 +1,94 @@
+/* BASE STYLES */
+
+:root {
+    --clr-dark: black;
+    --clr-light: white;
+    --clr-accent: red;
+}
+
+*,
+*::before,
+*::after {
+    box-sizing: border-box;
+}
+
+body {
+    margin: 0;
+    padding: 0;
+    line-height: 1.6;
+    word-spacing: 1.4px;
+    font-family: 'Roboto', sans-serif;
+    color: var(--clr-dark);
+    background-color: var(--clr-light);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.container {
+    width: 80%;
+    height: 700px;
+    margin: 0 auto;
+    border: 10px solid var(--clr-dark);
+}
+
+.item {
+    width: 150px;
+    height: 150px;
+    background-color: lightcoral;
+    padding: 1em;
+    font-weight: 700;
+    color: var(--clr-light);
+    text-align: center;
+    border: 10px solid var(--clr-accent);
+    border-radius: 10px;
+}
+
+/* END OF BASE STYLES */
+
+.container {
+    display: flex;
+    /*flex-direction: row;
+    justify-content: flex-start;*/
+    align-items: flex-start;
+    /*flex-wrap: wrap;
+    align-content: flex-start;
+    gap: 1em;*/
+}
+
+.item-1 {
+    /*flex-grow: 1;*/ /*grow tab to take up remaining space, how fast item grows relative to others*/
+    /*flex-shrink: 0;*/ /*refuse to shrink when page squished, how fast item shrinks relative to others*/
+    /*flex-basis: 0;*/ /*define item space before remaining space is distributed*/
+    /*flex: 1;*/ /*all 3 combined, 2nd 3rd param optional*/
+    /*align-self: flex-end;*/ /*override align-items in container*/
+    /*order: -1;*/ /*override order in which items appear, all items 0 by default, shdnt use unless necessary*/
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
