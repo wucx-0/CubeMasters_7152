@@ -20,7 +20,7 @@ camera.position.set(30, 30, 30);
 // Controls
 const controls = new THREE.OrbitControls(camera, renderer.domElement);
 controls.enableDamping = true;
-controls.dampingFactor = 0.05;
+controls.dampingFactor = 0.5;
 controls.minDistance = 20;
 controls.maxDistance = 100;
 
@@ -173,7 +173,7 @@ class RubiksCube {
 
     createFace(color, size) {
         const geometry = new THREE.PlaneGeometry(size, size);
-        const material = new THREE.MeshStandardMaterial({
+        const material = new THREE.MeshBasicMaterial({
             color: color,
             side: THREE.DoubleSide,
             roughness: 0.2,
@@ -198,6 +198,7 @@ class RubiksCube {
 // Create the cube
 const rubiksCube = new RubiksCube(3);
 
+const test_face = new THREE.PlaneGeometry(1, 1);
 // Animation loop
 function animate() {
     requestAnimationFrame(animate);
