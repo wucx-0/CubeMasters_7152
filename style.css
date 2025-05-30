@@ -14,8 +14,6 @@
     rgba(255, 192, 236, 1) 83.333%,
     rgba(255, 186, 236, 1) 100%
   );
-  --clr-backgroundwgrey:
-;
 }
 
 *,
@@ -63,8 +61,7 @@ body {
 .page-container {
   display: none;
   padding: 20px;
-  border: 1px solid #ccc;
-  margin-top: 10px;
+  margin-top: 0px;
 }
 button {
   padding: 10px 15px;
@@ -123,12 +120,13 @@ button:visited {
   border-radius: 10px;
 }
 
-//examplebelow
+/* example below */
 .item-1 {
   /*flex-grow: 1;*/ /*grow tab to take up remaining space, how fast item grows relative to others*/
   /*flex-shrink: 0;*/ /*refuse to shrink when page squished, how fast item shrinks relative to others*/
   /*flex-basis: 0;*/ /*define item space before remaining space is distributed*/
   /*flex: 1;*/ /*all 3 combined, 2nd 3rd param optional*/
   /*align-self: flex-end;*/ /*override align-items in container*/
-  /*order: -1;*/ /*override order in which items appear, all items 0 by default, shdnt use unless necessary*/
+  /*order: -1;*/ /*override order in which items appear, all items 0 by default, shdnt use unless necessary */
 }
+
