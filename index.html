@@ -1,77 +1,12 @@
 <!doctype html>
 <html lang="en">
   <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>CubeMasters</title>
-    <link rel="stylesheet" href="style.css" />
   </head>
   <body>
-    <div class="container">
-      <div class="navbar">
-        <div class="itemlogo Logo">
-          <a href="index.html">
-            <img
-              src="images/logo.png"
-              alt="CubeMasters Logo"
-              style="width: 130px; height: 65px"
-            />
-          </a>
-        </div>
-
-        <button class="item Login" data-page="page1">Login</button>
-        <button class="item Learn" data-page="page2">Learn</button>
-        <button class="item Solve" data-page="page3">Solve</button>
-        <button class="item Friends" data-page="page4">Friends</button>
-        <button class="item Leaderboard" data-page="page5">Leaderboard</button>
-        <button class="item More" data-page="page6">More</button>
-        <button class="item Search" data-page="page7">Search</button>
-      </div>
-
-      <div class="content">
-        <div id="page1" class="page-container"></div>
-        <div id="page2" class="page-container"></div>
-        <div id="page3" class="page-container"></div>
-        <div id="page4" class="page-container"></div>
-        <div id="page5" class="page-container"></div>
-        <div id="page6" class="page-container"></div>
-        <div id="page7" class="page-container"></div>
-      </div>
-    </div>
-
-    <script>
-      async function showPage(page) {
-        // Hide all pages first
-        document.querySelectorAll(".page-container").forEach((div) => {
-          div.style.display = "none";
-        });
-
-        const pageContainer = document.getElementById(page);
-
-        // Only fetch if not already loaded (avoids repeated network requests)
-        if (!pageContainer.innerHTML.trim()) {
-          try {
-            const response = await fetch(`pages/${page}.html`);
-            if (!response.ok) throw new Error(`Failed to load ${page}.html`);
-            pageContainer.innerHTML = await response.text();
-          } catch (error) {
-            pageContainer.innerHTML = `<h2>Error</h2><p>${error.message}</p>`;
-          }
-        }
-
-        // Show the current page
-        pageContainer.style.display = "block";
-      }
-
-      // Set up button click events
-      document.addEventListener("DOMContentLoaded", () => {
-        document.querySelectorAll("button").forEach((button) => {
-          button.addEventListener("click", () => {
-            showPage(button.dataset.page);
-          });
-        });
-
-        // Load Page 1 by default
-        showPage("page1");
-      });
-    </script>
+    <div id="root"></div>
+    <script type="module" src="/src/main.jsx"></script>
   </body>
 </html>
