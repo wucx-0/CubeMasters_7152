@@ -1,6 +1,6 @@
 // Initialize Three.js components
 const renderer = new THREE.WebGLRenderer({ antialias: true });
-renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.setSize(window.innerWidth * 0.5, window.innerHeight * 0.5);
 renderer.shadowMap.enabled = true;
 document.body.appendChild(renderer.domElement);
 
@@ -37,15 +37,22 @@ const directionalLight2 = new THREE.DirectionalLight(0xffffff, 0.5);
 directionalLight2.position.set(-1, -1, -1);
 scene.add(directionalLight2);
 
-// Utility function
-const degree = (rad) => rad * (Math.PI / 180);
+// Utility function, convert degree to rad
+const degree = (angle) => angle * (Math.PI / 180);
 
 // Cube class
 class RubiksCube {
     constructor(order = 3) {
+        if(order>10) {
+            throw new Error("Maximum cube size exceeded!");
+        }
         this.order = order;
         this.pieceSize = 3;
         this.gap = 0.1;
+        this.alreadyWon=false;
+        this.shuffling=false;
+        this.rotating = false;
+        this.editMode = true;
         this.colors = [
             0xff0000, // Red (Right)
             0x00ff00, // Green (Front)
@@ -56,6 +63,7 @@ class RubiksCube {
         ];
         this.offset = ((order - 1) * (this.pieceSize + this.gap)) / 2;
         this.blocks = [];
+        this.mergeObj=[];
         this.group = new THREE.Group();
         scene.add(this.group);
         
@@ -63,26 +71,26 @@ class RubiksCube {
     }
 
     initialize() {
-        // Create the 3D array structure
         for (let x = 0; x < this.order; x++) {
             this.blocks[x] = [];
             for (let y = 0; y < this.order; y++) {
                 this.blocks[x][y] = [];
                 for (let z = 0; z < this.order; z++) {
-                    // Skip internal pieces for standard Rubik's cube
-                    if (x > 0 && x < this.order - 1 &&
-                        y > 0 && y < this.order - 1 &&
-                        z > 0 && z < this.order - 1) {
+                    // Skip internal pieces
+                    if (x > 0 && x < this.order - 1 && y > 0 && y < this.order - 1 && z > 0 && z < this.order - 1) {
                         this.blocks[x][y][z] = null;
                         continue;
                     }
 
                     const piece = this.createPiece(x, y, z);
                     this.blocks[x][y][z] = {
-                        piece: piece,
-                        x: x,
-                        y: y,
-                        z: z
+                        piece: piece,  // THREE.Group
+                        logicalX: x,    // Logical position (unchanged during rotation)
+                        logicalY: y,
+                        logicalZ: z,
+                        renderedX: x,   // Rendered position (updated during rotation)
+                        renderedY: y,
+                        renderedZ: z
                     };
                     this.group.add(piece);
                 }
@@ -100,6 +108,8 @@ class RubiksCube {
         const posZ = z * (this.pieceSize + this.gap) - this.offset;
 
         // Create the core cube
+        pieceGroup.position.set(posX, posY, posZ);
+
         const geometry = new THREE.BoxGeometry(
             this.pieceSize,
             this.pieceSize,
@@ -193,14 +203,103 @@ class RubiksCube {
         }
         return this.blocks[x][y][z];
     }
+
+    rotationMatrixHelper = (i,j,direction='clockwise')=>{
+        const translationOffset = (this.order-1)/2;
+    
+        const translatedI = i - translationOffset;
+        const translatedJ = j - translationOffset;
+
+        const rotatedI = translatedJ * (direction==='clockwise'?-1:1);
+        const rotatedJ = translatedI * (direction==='clockwise'?1:-1);
+
+        const x = rotatedI + translationOffset;
+        const y = rotatedJ + translationOffset;
+        return {x,y};
+    }
+
+    rotateSclice = (axis, index, direction) => {
+        return new Promise((resolve) => {
+            if (this.rotating) return;
+            this.rotating = true;
+
+            const dirAngle = direction === 'clockwise' ? 1 : -1;
+            const rotationAngleInterval = 10;
+            let totalAngle = 0;
+
+            const animateRotation = () => {
+                if (totalAngle >= 90) {
+                    this.rotating = false;
+                    resolve("done");
+                    return;
+                }
+
+                requestAnimationFrame(animateRotation);
+
+                // Apply rotation to all pieces in the slice
+                for (let i = 0; i < this.order; i++) {
+                    for (let j = 0; j < this.order; j++) {
+                        let pieceData;
+                        switch (axis) {
+                            case 'x': pieceData = this.blocks[index][i][j]; break;
+                            case 'y': pieceData = this.blocks[i][index][j]; break;
+                            case 'z': pieceData = this.blocks[i][j][index]; break;
+                        }
+
+                        if (!pieceData) continue;
+
+                        const rotation = new THREE.Matrix4();
+                        switch (axis) {
+                            case 'x': rotation.makeRotationX(degree(rotationAngleInterval * dirAngle)); break;
+                            case 'y': rotation.makeRotationY(degree(rotationAngleInterval * dirAngle)); break;
+                            case 'z': rotation.makeRotationZ(degree(rotationAngleInterval * dirAngle)); break;
+                        }
+                        pieceData.piece.applyMatrix(rotation);
+                    }
+                }
+                totalAngle += rotationAngleInterval;
+            };
+
+            animateRotation();
+        });
+    };
+
+    rotate = (notation)=>{
+        const mapping ={
+            'U': ()=>cube.rotateSclice('y',2,'anticlockwise'),
+            'Uprime': ()=>cube.rotateSclice('y',2,'clockwise'),
+            'D':()=>cube.rotateSclice('y',0,'clockwise'),
+            'Dprime':()=>cube.rotateSclice('y',0,'anticlockwise'),
+            'R':()=>cube.rotateSclice('z',0,'clockwise'),
+            'Rprime':()=>cube.rotateSclice('z',0,'anticlockwise'),
+            'L':()=>cube.rotateSclice('z',2,'anticlockwise'),
+            'Lprime':()=>cube.rotateSclice('z',2,'clockwise'),
+            'F':()=>cube.rotateSclice('x',2,'anticlockwise'),
+            'Fprime':()=>cube.rotateSclice('x',2,'clockwise'),
+            'B':()=>cube.rotateSclice('x',0,'clockwise'),
+            'Bprime':()=>cube.rotateSclice('x',0,'anticlockwise'),
+            'M':()=>cube.rotateSclice('z',1,'anticlockwise'),
+            'Mprime':()=>cube.rotateSclice('z',1,'clockwise'),
+            'E':()=>cube.rotateSclice('y',1,'clockwise'),
+            'Eprime':()=>cube.rotateSclice('y',1,'anticlockwise'),
+            'S':()=>cube.rotateSclice('x',1,'anticlockwise'),
+            'Sprime':()=>cube.rotateSclice('x',1,'clockwise'),
+
+        }
+        try{
+            return mapping[notation]();
+        } catch(e){
+            console.error('Invalid notation', e);
+            console.log("step:",notation);
+        }
+    }
 }
-
 // Create the cube
-const rubiksCube = new RubiksCube(3);
+//rubiksCube = new RubiksCube(3);u
 
-const test_face = new THREE.PlaneGeometry(1, 1);
 // Animation loop
-function animate() {
+
+const animate = () => {
     requestAnimationFrame(animate);
     controls.update();
     renderer.render(scene, camera);
@@ -215,3 +314,33 @@ window.addEventListener('resize', () => {
 
 // Start animation
 animate();
+
+const cube = new RubiksCube(3);
+
+document.addEventListener('keydown', (event) => {
+    const keyMappings = {
+        'u': () => cube.rotate('U'),
+        'i': () => cube.rotate('Uprime'),
+        'd': () => cube.rotate('D'),
+        'k': () => cube.rotate('Dprime'),
+        'r': () => cube.rotate('R'),
+        'y': () => cube.rotate('Rprime'),
+        'l': () => cube.rotate('L'),
+        'h': () => cube.rotate('Lprime'),
+        'f': () => cube.rotate('F'),
+        'j': () => cube.rotate('Fprime'),
+        'b': () => cube.rotate('B'),
+        'g': () => cube.rotate('Bprime'),
+        'm': () => cube.rotate('M'),
+        'n': () => cube.rotate('Mprime'),
+        'e': () => cube.rotate('E'),
+        'o': () => cube.rotate('Eprime'),
+        's': () => cube.rotate('S'),
+        'w': () => cube.rotate('Sprime')
+    };
+    
+    if (keyMappings[event.key]) {
+        keyMappings[event.key]();
+    }
+});
+
