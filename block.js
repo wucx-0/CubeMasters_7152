@@ -51,8 +51,8 @@ class RubiksCube {
         this.axisZ = new THREE.Vector3(0,0,1);
 
         this.order = order;
-        this.pieceSize = 3;
-        this.gap = 0.1;
+        this.pieceSize = 10;
+        this.gap = 1.05;
         this.alreadyWon=false;
         this.shuffling=false;
         this.rotating = false;
@@ -65,9 +65,9 @@ class RubiksCube {
             0xff8c00, // Orange (Left)
             0xffffff  // White (Up)
         ];
-        this.offset = ((order - 1) * (this.pieceSize + this.gap)) / 2;
+        this.offset = (order - 1) * (this.pieceSize) / 2;
         this.blocks = [];
-        this.mergeObj=[];
+        this.mergeObj = [];
 
         for(let i=0;i<order;i++){
             let sclice=[];
@@ -94,10 +94,13 @@ class RubiksCube {
             }
         }
     }
-
+    /*
     createPiece(x, y, z) {
         const pieceGroup = new THREE.Object3D();
-        pieceGroup.name = ` ${x}${y}${z}`;
+        const skinProjection = 0.17;
+        pieceGroup.name = `${x}${y}${z}`;
+        const {i,j,k} = this.blocks[x][y][z];
+
 
         // Calculate position with gap
         const posX = x * (this.pieceSize + this.gap) - this.offset;
@@ -121,8 +124,8 @@ class RubiksCube {
         pieceGroup.add(cube);
 
         // Create colored faces (only on outer surfaces)
-        const faceSize = this.pieceSize * 0.95;
-        const faceOffset = this.pieceSize / 2 + 0.05;
+        const faceSize = this.pieceSize * 0.85;
+        const faceOffset = this.pieceSize / 2 + skinProjection;
 
         // Front face (green)
         if (z === this.order - 1) {
@@ -175,7 +178,97 @@ class RubiksCube {
         // Set position
         pieceGroup.position.set(posX, posY, posZ);
         scene.add(pieceGroup);
+        return pieceGroup;
+        
+    }
+    */
 
+    createPiece(x, y, z) {
+        const pieceGroup = new THREE.Object3D();
+        const skinProjection = 0.17;
+        const gap = 1.05; // Use the same gap as Code 2
+        pieceGroup.name = `${x}${y}${z}`;
+
+        // Get the base position from blocks array (like Code 2)
+        const {x: baseX, y: baseY, z: baseZ} = this.blocks[x][y][z];
+        
+        // Apply gap multiplier like Code 2
+        const posX = baseX * gap;
+        const posY = baseY * gap;
+        const posZ = baseZ * gap;
+
+        // Set the piece group position
+        pieceGroup.position.set(posX, posY, posZ);
+
+        const geometry = new THREE.BoxGeometry(
+            this.pieceSize,
+            this.pieceSize,
+            this.pieceSize
+        );
+        const material = new THREE.MeshStandardMaterial({ 
+            color: 0x111111,
+            roughness: 0.7
+        });
+        const cube = new THREE.Mesh(geometry, material);
+        cube.castShadow = true;
+        
+        // Position the cube at origin relative to pieceGroup (like Code 2)
+        cube.position.set(0, 0, 0);
+        pieceGroup.add(cube);
+
+        // Create colored faces (only on outer surfaces)
+        const faceSize = this.pieceSize * 0.85;
+        const faceOffset = this.pieceSize / 2 + skinProjection;
+
+        // Front face (green)
+        if (z === this.order - 1) {
+            const frontFace = this.createFace(this.colors[1], faceSize);
+            frontFace.position.set(0, 0, faceOffset);
+            frontFace.rotation.set(0, 0, degree(90)); // Match Code 2 rotation
+            pieceGroup.add(frontFace);
+        }
+
+        // Back face (blue)
+        if (z === 0) {
+            const backFace = this.createFace(this.colors[2], faceSize);
+            backFace.position.set(0, 0, -faceOffset);
+            backFace.rotation.set(0, 0, degree(90)); // Match Code 2 rotation
+            pieceGroup.add(backFace);
+        }
+
+        // Right face (red)
+        if (x === this.order - 1) {
+            const rightFace = this.createFace(this.colors[0], faceSize);
+            rightFace.position.set(faceOffset, 0, 0);
+            rightFace.rotation.set(0, degree(90), 0); // Match Code 2 rotation
+            pieceGroup.add(rightFace);
+        }
+
+        // Left face (orange)
+        if (x === 0) {
+            const leftFace = this.createFace(this.colors[4], faceSize);
+            leftFace.position.set(-faceOffset, 0, 0);
+            leftFace.rotation.set(0, degree(90), 0); // Match Code 2 rotation
+            pieceGroup.add(leftFace);
+        }
+
+        // Up face (white)
+        if (y === this.order - 1) {
+            const upFace = this.createFace(this.colors[5], faceSize);
+            upFace.position.set(0, faceOffset, 0);
+            upFace.rotation.set(degree(90), 0, 0); // Match Code 2 rotation
+            pieceGroup.add(upFace);
+        }
+
+        // Down face (yellow)
+        if (y === 0) {
+            const downFace = this.createFace(this.colors[3], faceSize);
+            downFace.position.set(0, -faceOffset, 0);
+            downFace.rotation.set(degree(90), 0, 0); // Match Code 2 rotation
+            pieceGroup.add(downFace);
+        }
+
+        scene.add(pieceGroup);
         return pieceGroup;
     }
 
@@ -195,9 +288,9 @@ class RubiksCube {
 
     get3DCoordinate(piece) {
         for(let i = 0; i < this.order; i++) {
-            for(let j = 0; i < this.order; j++) {
+            for(let j = 0; j < this.order; j++) {
                 for(let k = 0; k < this.order; k++) {
-                    if(this.block[i][j][k].piece.name == piece.name) {
+                    if(this.blocks[i][j][k].piece.name == piece.name) {
                         return {x:i, y:j, z:k};
                     }
                         
@@ -239,10 +332,10 @@ class RubiksCube {
                 throw new Error('Rotation not possible on this index : '+index+' because maximum size is : '+(this.order-1));
             if('xyz'.indexOf(axis)==-1)
             throw new Error('Rotation on invalid axis: '+axis);
-            let dirAngle = direction==='clockwise'?1:-1;
-            let rotationAngleInterval =10;
+            let dirAngle = direction === 'clockwise' ? 1: -1;
+            let rotationAngleInterval = 10;
             const tempSclice = {};
-            this.rotating= true;
+            this.rotating = true;
             switch(axis){
                 case 'x':
                     for(let i=0;i<this.order;i++){
