@@ -80,7 +80,7 @@ class CubeUIController {
       .cube-controls button:disabled {
         background: #cccccc;
         cursor: not-allowed;
-      }
+      }dfdf
     `;
     document.head.appendChild(style);
   }
