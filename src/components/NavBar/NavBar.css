@@ -1,0 +1,52 @@
+.navbar {
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    align-content: center;
+    /*how to make navbar sticky*/
+}
+
+.item {
+    /* Layout */
+    width: 190px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    /* Spacing */
+    padding: 5px;
+
+    /* Typography */
+    font-weight: 700;
+    color: rgba(0, 0, 0, 0.5);
+    text-decoration: none;
+    text-align: center;
+
+    /* Visual */
+    border-radius: 10px;
+    background-color: rgba(128, 128, 128, 0.15);
+    /* border: 2px solid lightslategrey; */ /* Keep commented unless needed */
+
+    /* Interaction */
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+.item:hover {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.itemlogo img {
+    object-fit: contain;
+}
+
+.itemlogo {
+    width: 190px;
+    height: 100px;
+    padding: 14px;
+    text-align: center;
+    /*border: 2px solid lightslategrey;*/
+    border-radius: 10px;
+    background-color: rgba(128, 128, 128, 0.15);
+}

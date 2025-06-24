@@ -1,0 +1,59 @@
+@import url('https://fonts.googleapis.com/css2?family=Lexend:wght@100..900&display=swap');
+
+/* BASE STYLES */
+:root {
+  --clr-dark: black;
+  --clr-light: white;
+  --clr-accent: red;
+  --clr-background: linear-gradient(
+    155deg,
+    rgba(169, 202, 255, 1) 0%,
+    rgba(184, 203, 255, 1) 16.667%,
+    rgba(211, 203, 255, 1) 33.333%,
+    rgba(240, 200, 249, 1) 50%,
+    rgba(255, 197, 241, 1) 66.667%,
+    rgba(255, 192, 236, 1) 83.333%,
+    rgba(255, 186, 236, 1) 100%
+  );
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  background: var(--clr-background);
+  margin: 0;
+  min-height: 100vh;
+  /*line-height: 1.6;
+  word-spacing: 1.4px;*/
+  font-family: 'Lexend', sans-serif;
+
+  background-attachment: fixed;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 5px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(128, 128, 128, 0.15);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(128, 128, 128, 0.3);
+
+}
+
+/* END OF BASE STYLES */
