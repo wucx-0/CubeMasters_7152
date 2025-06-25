@@ -1,6 +1,6 @@
 // Initialize Three.js components
 const renderer = new THREE.WebGLRenderer({ antialias: true });
-renderer.setSize(window.innerWidth * 0.5, window.innerHeight * 0.5);
+renderer.setSize(window.innerWidth, window.innerHeight);
 renderer.shadowMap.enabled = true;
 document.body.appendChild(renderer.domElement);
 
@@ -489,23 +489,23 @@ const cube = new RubiksCube(3);
 document.addEventListener('keydown', (event) => {
     const keyMappings = {
         'u': () => cube.rotate('U'),
-        'i': () => cube.rotate('Uprime'),
+        'U': () => cube.rotate('Uprime'),
         'd': () => cube.rotate('D'),
-        'k': () => cube.rotate('Dprime'),
+        'D': () => cube.rotate('Dprime'),
         'r': () => cube.rotate('R'),
-        'y': () => cube.rotate('Rprime'),
+        'R': () => cube.rotate('Rprime'),
         'l': () => cube.rotate('L'),
-        'h': () => cube.rotate('Lprime'),
+        'L': () => cube.rotate('Lprime'),
         'f': () => cube.rotate('F'),
-        'j': () => cube.rotate('Fprime'),
+        'F': () => cube.rotate('Fprime'),
         'b': () => cube.rotate('B'),
-        'g': () => cube.rotate('Bprime'),
+        'B': () => cube.rotate('Bprime'),
         'm': () => cube.rotate('M'),
-        'n': () => cube.rotate('Mprime'),
+        'M': () => cube.rotate('Mprime'),
         'e': () => cube.rotate('E'),
-        'o': () => cube.rotate('Eprime'),
+        'E': () => cube.rotate('Eprime'),
         's': () => cube.rotate('S'),
-        'w': () => cube.rotate('Sprime')
+        'S': () => cube.rotate('Sprime')
     };
     
     if (keyMappings[event.key]) {
