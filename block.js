@@ -51,7 +51,7 @@ class RubiksCube {
         this.axisZ = new THREE.Vector3(0,0,1);
 
         this.order = order;
-        this.pieceSize = 10;
+        this.pieceSize = 5;
         this.gap = 1.05;
         this.alreadyWon=false;
         this.shuffling=false;
@@ -68,6 +68,7 @@ class RubiksCube {
         this.offset = (order - 1) * (this.pieceSize) / 2;
         this.blocks = [];
         this.mergeObj = [];
+
 
         for(let i=0;i<order;i++){
             let sclice=[];
