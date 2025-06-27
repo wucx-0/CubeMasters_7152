@@ -52,7 +52,7 @@
 }
 
 .learnListHeader {
-  padding-top: 10px;
+  padding-top: 0px;
   margin-bottom: 0px;
 }
 
@@ -62,12 +62,13 @@
 
 .learnListHeaderItem {
   /* Layout */
-  width: 800px;
+  width: 900px;
   height: 40px;
-  display: flex;
-  flex-direction: row;
+  display: grid;
+  grid-template-columns: 80px 120px 80px 300px 100px 150px;
   align-items: center;
   justify-content: center;
+  padding-left: 20px;
 
   /* Typography */
   font-weight: 300;
@@ -84,7 +85,7 @@
 
 .learnListItem {
   /* Layout */
-  width: 800px;
+  width: 900px;
   height: 100px;
   display: flex;
   flex-direction: row;
@@ -121,6 +122,18 @@
   object-position: center;
 }
 
+.learnListItem,
+.stepsList li {
+  list-style-type: none;
+}
+
+.learnList,
+.learnListHeader,
+.stepsList {
+  list-style-type: none;
+  padding-left: 0; /* Also remove default padding if needed */
+}
+
 .stepsListItem {
   display: flex;
   flex-direction: column;
@@ -133,33 +146,47 @@
   white-space: nowrap; /* Keep each step on one line */
 }
 
-ul li span:nth-child(1) {
+ul li span:nth-child(1) { /*cubeimage*/
   width: 100px;
   text-align: left;
   /*border: 1px solid var(--clr-dark);*/ /* Keep commented unless needed */
 }
 
-ul li span:nth-child(2) {
+ul li span:nth-child(2) { /*algcat*/
   width: 120px;
   /*border: 1px solid var(--clr-dark);*/ /* Keep commented unless needed */
 }
 
-ul li span:nth-child(3) {
+ul li span:nth-child(3) { /*algid*/
   width: 80px;
   text-align: left;
   /*border: 1px solid var(--clr-dark);*/ /* Keep commented unless needed */
 }
 
-ul li span:nth-child(4) {
-  width: 330px;
+ul li span:nth-child(4) { /*algsteps*/
+  width: 300px;
   text-align: left;
   /*border: 1px solid var(--clr-dark);*/ /* Keep commented unless needed */
 }
 
-ul li span:nth-child(5) {
+ul li span:nth-child(5) { /*algdescription*/
   width: 100px;
   text-align: center;
   /*border: 1px solid var(--clr-dark);*/ /* Keep commented unless needed */
 }
+
+ul li span:nth-child(6) { /*favourite*/
+  width: 150px;
+  text-align: center;
+  /*border: 1px solid var(--clr-dark);*/ /* Keep commented unless needed */
+}
+
+.favorite {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+
 
 /*end of LearnPage styles*/
