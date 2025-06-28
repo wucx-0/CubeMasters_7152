@@ -5,7 +5,7 @@ import IconButton from "@mui/material/IconButton";
 import FavoriteBorder from "@mui/icons-material/FavoriteBorder";
 import Favorite from "@mui/icons-material/Favorite";
 
-const LearnPage = () => {
+function LearnPage() {
   const [query, setQuery] = useState("");
   const [favorites, setFavorites] = useState({});
   const [originalOrder, setOriginalOrder] = useState([]);

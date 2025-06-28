@@ -1,8 +1,17 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import "./NavBar.css";
+import { supabase } from "../../App";
+import Button from "@mui/material/Button";
 
-const Navbar = () => {
+function Navbar() {
+  async function handleLogout() {
+    const { error } = await supabase.auth.signOut();
+    if (error != null) {
+        console.error("There is an error when signing out..." + error.message);
+    }
+  }
+
   return (
     <div className="navbar">
       <div className="itemlogo Logo">
@@ -36,8 +45,16 @@ const Navbar = () => {
       <Link to="/search" className="item Search">
         Search
       </Link>
+      <Button
+        onClick={handleLogout}
+        variant="outlined"
+        color="error"
+        className="item"
+      >
+        Logout
+      </Button>
     </div>
   );
-};
+}
 
 export default Navbar;
