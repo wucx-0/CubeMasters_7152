@@ -1,39 +1,38 @@
-import React from 'react';
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Navbar from "./components/NavBar/NavBar.jsx";
-import PageContainer from './components/PageContainer/PageContainer';
-import LoginPage from "./pages/LoginPage";
-import LearnPage from "./pages/LearnPage";
-import SolvePage from "./pages/SolvePage";
-import FriendsPage from "./pages/FriendsPage";
-import LeaderboardPage from "./pages/LeaderboardPage";
-import MorePage from "./pages/MorePage";
-import SearchPage from "./pages/SearchPage";
-// import { useState } from "react";
 import "./App.css";
+import { useState, useEffect } from "react";
+import { createClient } from "@supabase/supabase-js";
+import CubeApp from "./pages/CubeApp";
+import { ThemeSupa } from "@supabase/auth-ui-shared";
+import LoginPage from "./pages/LoginPage.jsx";
 
-function App() {
-  return (
-    <Router>
-      <div className="App app-container">
-        <Navbar />
-        <PageContainer>
-          <Routes>
-            <Route path="/login" element={<LoginPage />} />
-            <Route path="/learn" element={<LearnPage />} />
-            <Route path="/solve" element={<SolvePage />} />
-            <Route path="/friends" element={<FriendsPage />} />
-            <Route path="/leaderboard" element={<LeaderboardPage />} />
-            <Route path="/more" element={<MorePage />} />
-            <Route path="/search" element={<SearchPage />} />
+export const supabase = createClient(
+  "https://meejapxlwiuxcszkekhf.supabase.co",
+  "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im1lZWphcHhsd2l1eGNzemtla2hmIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTEwMTUwMTQsImV4cCI6MjA2NjU5MTAxNH0.essdaHfc4Sbfirnn1yCd0oCMPgnH6Z81_ltb_jPnLHU",
+);
 
-            {/* Default page */}
-            <Route path="/" element={<LearnPage />} />
-          </Routes>
-        </PageContainer>
-      </div>
-    </Router>
-  );
+export default function App() {
+  const [session, setSession] = useState(null);
+
+  useEffect(() => {
+    //one time thing
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setSession(session);
+    });
+
+    //active listener
+    const {
+      data: { subscription },
+    } = supabase.auth.onAuthStateChange((_event, session) => {
+      setSession(session);
+    });
+
+    //clean up function in useEffect
+    return () => subscription.unsubscribe();
+  }, []);
+
+  if (!session) {
+    return <LoginPage />;
+  } else {
+    return <CubeApp session={session} supabase={supabase} />;
+  }
 }
-
-export default App;
