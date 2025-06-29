@@ -23,10 +23,6 @@ function Navbar() {
           />
         </Link>
       </div>
-
-      <Link to="/login" className="item Login">
-        Login
-      </Link>
       <Link to="/learn" className="item Learn">
         Learn
       </Link>
