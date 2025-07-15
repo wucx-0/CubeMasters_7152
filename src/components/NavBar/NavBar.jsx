@@ -1,14 +1,16 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import "./NavBar.css";
-import { supabase } from "../../App";
+import { auth } from "../../firebase";
+import { signOut } from "firebase/auth";
 import Button from "@mui/material/Button";
 
 function Navbar() {
   async function handleLogout() {
-    const { error } = await supabase.auth.signOut();
-    if (error != null) {
-        console.error("There is an error when signing out..." + error.message);
+    try {
+      await signOut(auth);
+    } catch (error) {
+      console.error("Error signing out: ", error.message);
     }
   }
 

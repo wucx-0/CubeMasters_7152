@@ -1,72 +1,136 @@
-import React from "react";
+import React, { useState } from "react";
+import { auth } from "../firebase";
+import {
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+} from "firebase/auth";
 import "./pages.css";
-import { Auth } from "@supabase/auth-ui-react";
-import { ThemeSupa } from "@supabase/auth-ui-shared";
-import { supabase } from "../App";
 
 function LoginPage() {
-  const customTheme = {
-    default: {
-      colors: {
-        brand: "rgba(21, 101, 192, 0.8)", // Primary button/input focus color
-        brandAccent: "rgb(21, 101, 192)", // Button hover color
-        inputBackground: "rgba(128, 128, 128, 0.1)",
-        inputBorder: "rgb(200, 200, 200)",
-        inputText: "rgb(50, 50, 50)",
-        inputPlaceholder: "rgb(150, 150, 150)",
-      },
-      space: {
-        spaceSmall: "4px",
-        spaceMedium: "8px",
-        spaceLarge: "16px",
-      },
-      radii: {
-        borderRadiusButton: "8px",
-        inputBorderRadius: "8px",
-      },
-    },
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isSignup, setIsSignup] = useState(false);
+  const [error, setError] = useState("");
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+
+    try {
+      if (isSignup) {
+        await createUserWithEmailAndPassword(auth, email, password);
+      } else {
+        await signInWithEmailAndPassword(auth, email, password);
+      }
+    } catch (err) {
+      if (err.code === "auth/email-already-in-use") {
+        setError("That email is already registered. Please log in instead.");
+      } else {
+        setError(err.message);
+      }
+    }
   };
 
   return (
-    <div className="pages">
+    <div
+      className="pages"
+      style={{
+        display: "flex",
+        flexDirection: "column",
+        alignItems: "center",
+        gap: "16px",
+      }}
+    >
       <img
         src="/images/logo.png"
         alt="CubeMasters Logo"
-        style={{ width: "260px", height: "130px" }}
+        style={{ width: "260px", height: "130px", marginBottom: "16px" }}
       />
-      <Auth
-        supabaseClient={supabase}
-        appearance={{
-          theme: ThemeSupa,
-          variables: customTheme,
-          style: {
-            button: {
-              width: "100%",
-              marginTop: "16px",
-            },
-            input: {
-              width: "100%",
-              padding: "12px",
-              fontSize: "16px",
-            },
-            label: {
-              marginBottom: "8px",
-              fontSize: "14px",
-            },
-          },
-        }}
-        providers={[]}
-        localization={{
-          variables: {
-            sign_in: {
-              email_label: "Your Email Address",
-              password_label: "Your Password",
-              email_input_placeholder: "Enter your email",
-              password_input_placeholder: "Enter your password",
-            },
-          },
-        }}
-      />
+
+      <form
+        onSubmit={handleSubmit}
+        style={{ maxWidth: "320px", width: "100%" }}
+      >
+        <label
+          style={{ display: "block", marginBottom: "8px", fontSize: "14px" }}
+        >
+          Email:
+        </label>
+        <input
+          type="email"
+          placeholder="Enter your email"
+          className="input"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+          style={{
+            width: "100%",
+            padding: "12px",
+            fontSize: "16px",
+            borderRadius: "8px",
+            border: "1px solid #ccc",
+            marginBottom: "12px",
+          }}
+        />
+
+        <label
+          style={{ display: "block", marginBottom: "8px", fontSize: "14px" }}
+        >
+          Password:
+        </label>
+        <input
+          type="password"
+          placeholder="Enter your password"
+          className="input"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+          style={{
+            width: "100%",
+            padding: "12px",
+            fontSize: "16px",
+            borderRadius: "8px",
+            border: "1px solid #ccc",
+            marginBottom: "16px",
+          }}
+        />
+
+        {error && <p style={{ color: "red", fontSize: "14px" }}>{error}</p>}
+
+        <button
+          type="submit"
+          style={{
+            width: "100%",
+            backgroundColor: "rgba(21, 101, 192, 0.8)",
+            color: "#fff",
+            padding: "12px",
+            fontSize: "16px",
+            borderRadius: "8px",
+            border: "none",
+            cursor: "pointer",
+            marginTop: "8px",
+          }}
+        >
+          {isSignup ? "Sign Up" : "Login"}
+        </button>
+      </form>
+
+      <p style={{ fontSize: "14px", marginTop: "12px" }}>
+        {isSignup ? "Already have an account?" : "Don't have an account?"}
+        <button
+          onClick={() => setIsSignup(!isSignup)}
+          style={{
+            background: "none",
+            border: "none",
+            color: "rgb(21, 101, 192)",
+            cursor: "pointer",
+            textDecoration: "underline",
+            fontSize: "14px",
+          }}
+        >
+          {isSignup ? "Login" : "Sign up"}
+        </button>
+      </p>
     </div>
   );
 }
