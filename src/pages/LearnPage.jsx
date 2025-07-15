@@ -4,31 +4,61 @@ import { AlgDB } from "../components/LearnPage/AlgDB.js";
 import IconButton from "@mui/material/IconButton";
 import FavoriteBorder from "@mui/icons-material/FavoriteBorder";
 import Favorite from "@mui/icons-material/Favorite";
+import { onAuthStateChanged } from "firebase/auth";
+import { db, auth } from "../firebase";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 
 function LearnPage() {
   const [query, setQuery] = useState("");
   const [favorites, setFavorites] = useState({});
   const [originalOrder, setOriginalOrder] = useState([]);
 
-  // Initialize original order and load saved favorites
   useEffect(() => {
-    setOriginalOrder(AlgDB.map((alg) => alg.alg_id));
-    const savedFavorites = localStorage.getItem("algorithmFavorites");
-    if (savedFavorites) {
-      setFavorites(JSON.parse(savedFavorites));
-    }
+    const unsubscribe = onAuthStateChanged(auth, (user) => {
+      if (user) {
+        setOriginalOrder(AlgDB.map((alg) => alg.alg_id));
+        fetchFavorites(user.uid);
+      } else {
+        setFavorites({});
+      }
+    });
+
+    return () => unsubscribe();
   }, []);
 
-  const toggleFavorite = (algId) => {
+  const fetchFavorites = async (uid) => {
+    try {
+      const docRef = doc(db, "favorites", uid);
+      const docSnap = await getDoc(docRef);
+      if (docSnap.exists()) {
+        setFavorites(docSnap.data());
+      } else {
+        setFavorites({});
+      }
+    } catch (error) {
+      console.error("Error fetching favorites:", error);
+      setFavorites({});
+    }
+  };
+
+  const toggleFavorite = async (algId) => {
+    const user = auth.currentUser;
+    if (!user) return;
+
     const newFavorites = {
       ...favorites,
       [algId]: !favorites[algId],
     };
     setFavorites(newFavorites);
-    localStorage.setItem("algorithmFavorites", JSON.stringify(newFavorites));
+
+    try {
+      const docRef = doc(db, "favorites", user.uid);
+      await setDoc(docRef, newFavorites);
+    } catch (error) {
+      console.error("Error saving favorite:", error);
+    }
   };
 
-  // Filter algorithms based on search query
   const filteredAlgorithms = AlgDB.filter(
     (alg) =>
       new RegExp(query, "i").test(alg.alg_id) ||
@@ -130,6 +160,6 @@ function LearnPage() {
       </ul>
     </div>
   );
-};
+}
 
 export default LearnPage;
