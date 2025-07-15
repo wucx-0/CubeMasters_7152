@@ -12,7 +12,10 @@ import LearnPage from "./LearnPage";
 import SolvePage from "./SolvePage";
 import FriendsPage from "./FriendsPage";
 import LeaderboardPage from "./LeaderboardPage";
-import MorePage from "./MorePage";
+import SettingsPage from "./SettingsPage";
+import SettingsPersonalisation from "./settings/SettingsPersonalisation.jsx";
+import SettingsTimer from "./settings/SettingsTimer.jsx";
+import SettingsAbout from "./settings/SettingsAbout.jsx";
 import SearchPage from "./SearchPage";
 
 function CubeApp({ user }) {
@@ -43,9 +46,17 @@ function CubeApp({ user }) {
               element={user ? <LeaderboardPage /> : <Navigate to="/login" />}
             />
             <Route
-              path="/more"
-              element={user ? <MorePage /> : <Navigate to="/login" />}
-            />
+              path="/settings"
+              element={user ? <SettingsPage /> : <Navigate to="/login" />}
+            >
+              <Route path="about" element={<SettingsAbout />} />
+              <Route path="personalisation" element={<SettingsPersonalisation />} />
+              <Route path="timer" element={<SettingsTimer />} />
+              <Route
+                index
+                element={<Navigate to="personalisation" replace />}
+              />
+            </Route>
             <Route
               path="/search"
               element={user ? <SearchPage /> : <Navigate to="/login" />}

@@ -147,6 +147,7 @@ function LearnPage() {
                 }
                 onClick={() => toggleFavorite(alg.alg_id)}
                 size="small"
+                disableRipple
               >
                 {favorites[alg.alg_id] ? (
                   <Favorite color="error" />

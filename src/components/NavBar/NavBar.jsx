@@ -37,8 +37,8 @@ function Navbar() {
       <Link to="/leaderboard" className="item Leaderboard">
         Leaderboard
       </Link>
-      <Link to="/more" className="item More">
-        More
+      <Link to="/settings" className="item Settings">
+        Settings
       </Link>
       <Link to="/search" className="item Search">
         Search
