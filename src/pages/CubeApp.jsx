@@ -16,7 +16,7 @@ import SettingsPage from "./SettingsPage";
 import SettingsPersonalisation from "./settings/SettingsPersonalisation.jsx";
 import SettingsTimer from "./settings/SettingsTimer.jsx";
 import SettingsAbout from "./settings/SettingsAbout.jsx";
-import SearchPage from "./SearchPage";
+import TimerPage from "./TimerPage.jsx";
 
 function CubeApp({ user }) {
   return (
@@ -58,8 +58,8 @@ function CubeApp({ user }) {
               />
             </Route>
             <Route
-              path="/search"
-              element={user ? <SearchPage /> : <Navigate to="/login" />}
+              path="/timer"
+              element={user ? <TimerPage /> : <Navigate to="/login" />}
             />
             <Route
               path="/"

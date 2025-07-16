@@ -2,9 +2,13 @@ import React from "react";
 import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
 import { Button, TextField, MenuItem, CircularProgress } from "@mui/material";
+import { Divider } from '@mui/material';
 import { getAuth } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
 import { db } from "../../firebase";
+
+import CustomButton from "../../components/CustomButton.jsx";
+
 import "../../pages/pages.css";
 
 const PersonalisationSchema = Yup.object().shape({
@@ -205,10 +209,8 @@ export default function PersonalisationForm() {
             </div>
 
             <div className="form-row description-row">
-              <label className="form-label description-label">
-                Description:
-              </label>
-              <div className="form-field">
+              <div className="form-label description-label">Description:</div>
+              <div className="form-field description-field">
                 <Field
                   as={TextField}
                   name="description"
@@ -219,30 +221,34 @@ export default function PersonalisationForm() {
               </div>
             </div>
 
+            <div style={{ height: 48 }} />
+
+            {/*edit as needed*/}
+            {/*<div className="form-row">
+              <label className="form-label">Next Setting:</label>
+              <div className="form-field description-field">
+                <Field
+                    as={TextField}
+                    name="nextsettingdescription"
+                    multiline
+                    rows={3}
+                    fullWidth
+                />
+              </div>
+            </div>*/}
+
             <div
               style={{
                 display: "flex",
                 justifyContent: "center",
-                marginTop: "70px",
+                marginTop: "20px",
               }}
             >
-              <Button
+              <CustomButton
                 type="submit"
-                color="inherit"
-                sx={{
-                  width: "190px",
-                  height: "50px",
-                  borderRadius: "10px",
-                  backgroundColor: "rgba(128, 128, 128, 0.15)",
-                  "&:hover": {
-                    backgroundColor: "rgba(255, 255, 255, 0.2)",
-                  },
-                }}
-                disabled={isSubmitting}
-                startIcon={isSubmitting ? <CircularProgress size={20} /> : null}
-              >
-                {isSubmitting ? "Saving..." : "Save Changes"}
-              </Button>
+                label="Save Changes"
+                isSubmitting={isSubmitting}
+              />
             </div>
           </Form>
         )}

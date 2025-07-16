@@ -262,7 +262,7 @@ ul li span:nth-child(6) { /*favourite*/
 .form-row {
   display: flex;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
   font-family: inherit;
   /*border: 1px solid var(--clr-dark);*/ /* Keep commented unless needed */
 }
@@ -270,8 +270,9 @@ ul li span:nth-child(6) { /*favourite*/
 .form-label {
   width: 150px;
   margin-right: 16px;
-  font-weight: 500;
+  font-weight: bold;
   font-family: inherit;
+  margin-right: 20px;
   /*border: 1px solid var(--clr-dark);*/ /* Keep commented unless needed */
 }
 
@@ -280,13 +281,13 @@ ul li span:nth-child(6) { /*favourite*/
 }
 
 .description-label {
-  margin-top: 16px;
+  margin-top: 8px;
   font-family: inherit;
   /*border: 1px solid var(--clr-dark);*/ /* Keep commented unless needed */
 }
 
 .form-field {
-  flex-grow: 1;
+  flex: 1;
   width: 500px;
   height: 50px;
   font-family: inherit;
@@ -305,5 +306,7 @@ ul li span:nth-child(6) { /*favourite*/
 }
 
 /*end of Settings-personalisation styles*/
+
+
 
 /*end of SettingsPage styles*/
