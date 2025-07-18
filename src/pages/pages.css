@@ -3,10 +3,11 @@
   flex-direction: column;
   align-items: center;
 
-  padding: 30px;
+  padding: 20px;
   border-radius: 10px;
   margin: 10px;
   background-color: rgba(128, 128, 128, 0.15);
+  height: 97vh;
 }
 
 /*start of LearnPage styles*/
@@ -71,11 +72,10 @@
 /*  padding-left: 00px;*/
 
   /* Typography */
-  font-weight: 300;
+  font-weight: bold;
   color: var(--clr-dark);
   text-decoration: none;
   text-align: center;
-  font-weight: bold;
 
   /* Visual */
   border-radius: 10px;
@@ -137,7 +137,7 @@
 .stepsListItem {
   display: flex;
   flex-direction: column;
-  align-items: left;
+  align-items: center;
   justify-content: center;
   margin: 20px 0;
 }
@@ -186,6 +186,270 @@ ul li span:nth-child(6) { /*favourite*/
   justify-content: center;
 }
 
-
-
 /*end of LearnPage styles*/
+
+/*start of TimerPage styles*/
+
+/* Main layout grid */
+.timer-grid {
+  height: 97vh;
+  width: 98.5%;
+  display: grid;
+  grid-template-columns: 1fr 330px; /* 330 + 10 for margin */
+  overflow: hidden;
+}
+
+/* Center timer display */
+.main-timer-center {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.scramble-display {
+  font-size: 1.6rem;
+  margin-bottom: 50px;
+  word-break: break-word;
+  text-align: center;
+  max-width: 800px;
+  user-select: text;
+}
+
+.big-timer {
+  font-size: 7rem;
+  font-weight: bold;
+  text-align: center;
+  color: #333;
+}
+
+/* Right sidebar */
+.right-sidebar {
+  width: 330px;
+/*  padding: 16px;*/
+  border-radius: 10px;
+  padding: 0px 20px 12px 12px;
+  background-color: rgba(128, 128, 128, 0.1);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.sidebar-grid-header,
+.sidebar-grid-row {
+  display: grid;
+  grid-template-columns: 40px 95px 55px 55px 25px;
+  align-items: center;
+  padding: 6px 0;
+  padding-left: 10px;
+  padding-right: 10px;
+  font-size: 0.9rem;
+}
+
+.sidebar-grid-header {
+  font-weight: bold;
+  border-bottom: 1px solid #aaa;
+}
+
+.sidebar-grid-row:nth-child(even) {
+  background-color: rgba(128, 128, 128, 0.15);
+}
+
+.solves-scroll-area {
+  max-height: 280px; /* Or adjust as needed */
+  min-height: 280px;
+  overflow-y: auto;
+  margin-bottom: 0px;
+}
+
+.time-clickable {
+  cursor: pointer;
+  color: #007bff;
+  text-decoration: underline;
+}
+
+/* Best stats section */
+.best-stats {
+}
+
+/* Sidebar control buttons */
+.sidebar-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.custom-button-group {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.stats-grid-2col {
+  display: grid;
+  grid-template-columns: 80px 1fr 1fr;
+  gap: 6px 12px;
+  font-size: 0.85rem;
+  align-items: center;
+}
+
+.stats-grid-2col .grid-col-header {
+  font-weight: bold;
+  text-align: center;
+  color: #444;
+}
+
+.stats-grid-2col .stat-label {
+  font-weight: bold;
+  color: #555;
+  text-align: center;
+}
+
+/* Popup */
+.popup {
+  position: fixed;
+  top: 28%;
+  left: 24.5%;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 10px;
+  padding: 20px;
+  width: 650px;
+  height: 300px;
+  text-align: center;
+}
+
+.popup h4 {
+  margin-bottom: 10px;
+}
+
+.popup button {
+  margin: 6px;
+  width: 150px;
+}
+
+/*end of TimerPage styles*/
+
+/*start of SettingsPage styles*/
+
+.settings-container {
+  font-family: 'Lexend', sans-serif;
+  /*border: 1px solid var(--clr-dark);*/ /* Keep commented unless needed */
+}
+
+.settings-top-bar {
+  display: flex;
+  flex-direction: row;
+  padding: 10px;
+  align-items: center;
+  background-color: rgba(128, 128, 128, 0);
+  border-radius: 10px;
+  gap: 10px; /* Space between items */
+  position: sticky;
+  margin-bottom: 20px;
+  /*border: 1px solid var(--clr-dark);*/ /* Keep commented unless needed */
+}
+
+.settings-item {
+  /* Layout */
+  height: 50px;
+  min-width: 100px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  /* Spacing */
+  padding: 5px 15px;
+
+  /* Typography */
+  font-weight: 700;
+  color: rgba(0, 0, 0, 0.5);
+  text-decoration: none;
+  text-align: center;
+
+  /* Visual */
+  border-radius: 10px;
+  background-color: rgba(128, 128, 128, 0.15);
+
+  /* Interaction */
+  transition: all 0.3s ease;
+  cursor: pointer;
+
+  /*border: 1px solid var(--clr-dark);*/ /* Keep commented unless needed */
+}
+
+.settings-item:hover {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.settings-item.active {
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.settings-content {
+  border-radius: 8px;
+  /*border: 1px solid var(--clr-dark);*/ /* Keep commented unless needed */
+}
+
+/*start of Settings-personalisation styles*/
+
+.personalisation-form {
+  width: 100%;
+  max-width: 1000px;
+  font-family: inherit;
+  /*border: 1px solid var(--clr-dark);*/ /* Keep commented unless needed */
+}
+
+.form-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 20px;
+  font-family: inherit;
+  /*border: 1px solid var(--clr-dark);*/ /* Keep commented unless needed */
+}
+
+.form-label {
+  width: 150px;
+  margin-right: 16px;
+  font-weight: bold;
+  font-family: inherit;
+  margin-right: 20px;
+  /*border: 1px solid var(--clr-dark);*/ /* Keep commented unless needed */
+}
+
+.description-row {
+  align-items: flex-start;
+}
+
+.description-label {
+  margin-top: 8px;
+  font-family: inherit;
+  /*border: 1px solid var(--clr-dark);*/ /* Keep commented unless needed */
+}
+
+.form-field {
+  flex: 1;
+  width: 500px;
+  height: 50px;
+  font-family: inherit;
+  /*border: 1px solid var(--clr-dark);*/ /* Keep commented unless needed */
+}
+
+.personalisation-form input,
+.personalisation-form textarea,
+.personalisation-form .MuiInputBase-input,
+.personalisation-form .MuiFormLabel-root {
+  font-family: 'Lexend', sans-serif !important;
+}
+
+.personalisation-form button {
+  font-family: 'Lexend', sans-serif !important;
+}
+
+/*end of Settings-personalisation styles*/
+
+
+
+/*end of SettingsPage styles*/
