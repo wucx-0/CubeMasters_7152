@@ -7,7 +7,7 @@
   border-radius: 10px;
   margin: 10px;
   background-color: rgba(128, 128, 128, 0.15);
-  height: 97%
+  height: 97vh;
 }
 
 /*start of LearnPage styles*/
@@ -72,11 +72,10 @@
 /*  padding-left: 00px;*/
 
   /* Typography */
-  font-weight: 300;
+  font-weight: bold;
   color: var(--clr-dark);
   text-decoration: none;
   text-align: center;
-  font-weight: bold;
 
   /* Visual */
   border-radius: 10px;
@@ -188,6 +187,150 @@ ul li span:nth-child(6) { /*favourite*/
 }
 
 /*end of LearnPage styles*/
+
+/*start of TimerPage styles*/
+
+/* Main layout grid */
+.timer-grid {
+  height: 97vh;
+  width: 98.5%;
+  display: grid;
+  grid-template-columns: 1fr 300px; /* or whatever your layout is */
+  overflow: hidden;
+}
+
+/* Center timer display */
+.main-timer-center {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+
+.scramble-display {
+  font-size: 1.6rem;
+  margin-bottom: 50px;
+  word-break: break-word;
+  text-align: center;
+  max-width: 800px;
+  user-select: text;
+}
+
+.big-timer {
+  font-size: 7rem;
+  font-weight: bold;
+  text-align: center;
+  color: #333;
+}
+
+/* Right sidebar */
+.right-sidebar {
+  width: 330px;
+/*  padding: 16px;*/
+  border-radius: 10px;
+  padding: 0px 20px 12px 12px;
+  background-color: rgba(128, 128, 128, 0.1);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.sidebar-grid-header,
+.sidebar-grid-row {
+  display: grid;
+  grid-template-columns: 40px 95px 55px 55px 25px;
+  align-items: center;
+  padding: 6px 0;
+  padding-left: 10px;
+  padding-right: 10px;
+  font-size: 0.9rem;
+}
+
+.sidebar-grid-header {
+  font-weight: bold;
+  border-bottom: 1px solid #aaa;
+}
+
+.sidebar-grid-row:nth-child(even) {
+  background-color: rgba(128, 128, 128, 0.15);
+}
+
+.solves-scroll-area {
+  max-height: 280px; /* Or adjust as needed */
+  min-height: 280px;
+  overflow-y: auto;
+  margin-bottom: 0px;
+}
+
+.time-clickable {
+  cursor: pointer;
+  color: #007bff;
+  text-decoration: underline;
+}
+
+/* Best stats section */
+.best-stats {
+}
+
+/* Sidebar control buttons */
+.sidebar-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.custom-button-group {
+  display: flex;
+  flex-direction: row;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.stats-grid-2col {
+  display: grid;
+  grid-template-columns: 80px 1fr 1fr;
+  gap: 6px 12px;
+  font-size: 0.85rem;
+  align-items: center;
+}
+
+.stats-grid-2col .grid-col-header {
+  font-weight: bold;
+  text-align: center;
+  color: #444;
+}
+
+.stats-grid-2col .stat-label {
+  font-weight: bold;
+  color: #555;
+  text-align: center;
+}
+
+/* Popup */
+.popup {
+  position: fixed;
+  top: 28%;
+  left: 24.5%;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 10px;
+  padding: 20px;
+  width: 650px;
+  height: 300px;
+  text-align: center;
+}
+
+.popup h4 {
+  margin-bottom: 10px;
+}
+
+.popup button {
+  margin: 6px;
+  width: 150px;
+}
+
+/*end of TimerPage styles*/
 
 /*start of SettingsPage styles*/
 

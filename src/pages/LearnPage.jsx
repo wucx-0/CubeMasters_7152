@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import "./pages.css";
+
 import { AlgDB } from "../components/LearnPage/AlgDB.js";
 import IconButton from "@mui/material/IconButton";
 import FavoriteBorder from "@mui/icons-material/FavoriteBorder";
@@ -7,6 +7,8 @@ import Favorite from "@mui/icons-material/Favorite";
 import { onAuthStateChanged } from "firebase/auth";
 import { db, auth } from "../firebase";
 import { doc, getDoc, setDoc } from "firebase/firestore";
+
+import "./pages.css";
 
 function LearnPage() {
   const [query, setQuery] = useState("");
