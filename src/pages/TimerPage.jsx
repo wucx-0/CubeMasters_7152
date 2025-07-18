@@ -555,9 +555,9 @@ function TimerPage() {
             }}
           >
             <CustomButton
-              label="✖"
+              label="OK"
               onClick={() => {
-                deleteSolve(popupIndex);
+                addPenalty(popupIndex, 0); // Clear penalty by setting to 0
                 setPopupSolve(null);
               }}
             />

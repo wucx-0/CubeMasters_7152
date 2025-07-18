@@ -195,7 +195,7 @@ ul li span:nth-child(6) { /*favourite*/
   height: 97vh;
   width: 98.5%;
   display: grid;
-  grid-template-columns: 1fr 300px; /* or whatever your layout is */
+  grid-template-columns: 1fr 330px; /* 330 + 10 for margin */
   overflow: hidden;
 }
 
