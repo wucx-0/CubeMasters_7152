@@ -1443,7 +1443,6 @@
           let arr = [r,f,u,F,U,R];
           runMethodAtNo(arr,0,rotateNum,next);
       }
-      //顶棱面位 第一种情况
       step5Case1(rotateNum){
         if(!isRotating){
           let cube1 = getCubeByIndex(1,rotateNum);
@@ -1462,7 +1461,6 @@
           }
         }
       }
-      //顶棱面位 第二种情况
       step5Case2(rotateNum){
         if(!isRotating){
           let cube1 = getCubeByIndex(1,rotateNum);
@@ -1478,7 +1476,6 @@
           }
         }
       }
-      //顶棱面位 第三种情况
       step5Case3(rotateNum){
         if(!isRotating){
           let cube1 = getCubeByIndex(1,rotateNum);
@@ -1497,7 +1494,6 @@
           }
         }
       }
-      //判断是否完成第五步 顶棱面位
       checkStep5(){
         if(!checkStep4()){
           return false;
@@ -1551,7 +1547,6 @@
           let arr = [R,U,r,U,R,U,U,r];
           runMethodAtNo(arr,0,rotateNum);
       }
-      //顶角面位 第一种、第二种和第三种情况
       step6Case1(rotateNum){
         if(!isRotating){
           let cube0 = getCubeByIndex(0,rotateNum);
@@ -1570,7 +1565,6 @@
           }
         }
       }
-      //判断是否完成第六步 顶角面位
       checkStep6(){
         if(!checkStep5()){
           return false;
@@ -1613,7 +1607,6 @@
               console.log('something wrong in step7');
           }
       }
-      //顶棱归位 第一种情况
       step7Case1(rotateNum){
           if(!isRotating){
               let cube11 = getCubeByIndex(11,rotateNum);
@@ -1652,7 +1645,6 @@
               }
           }
       }
-      //顶棱归位 第二种情况
       step7Case2(rotateNum){
           if(!isRotating){
               let cube1 = getCubeByIndex(1,rotateNum);
@@ -1691,13 +1683,11 @@
               }
           }
       }
-      //顶棱归位 第三种情况（有两个对应的面顶棱完成，另外两个对应的面顶棱没有）
       step7Case3(){
           if(!isRotating&&!checkStep7()){
               u(0);
           }
       }
-      //判断是否完成第七步 顶棱归位
       checkStep7(){
           if(!checkStep6()){
               return false;
@@ -1749,7 +1739,6 @@
               console.log('something wrong in step8');
           }
       }
-      //判断顶角归位 是否完成
       checkStep8Item(indexs,line){
           if(indexs.length>0){
               let arr = getCubeByIndexs(indexs);
@@ -1800,7 +1789,6 @@
           let arr = [L,L,B,B,l,f,L,B,B,l,F,l];
           runMethodAtNo(arr,0,rotateNum);
       }
-      //顶角归位 第一种情况
       step8Case1(rotateNum){
           if(!isRotating){
               let cube2 = getCubeByIndex(2,rotateNum);
@@ -1813,7 +1801,6 @@
               }
           }
       }
-      //顶角归位 第二种情况
       step8Case2(rotateNum){
           if(!isRotating){
               let cube0 = getCubeByIndex(0,rotateNum);
@@ -1832,7 +1819,6 @@
               }
           }
       }
-      //顶角归位 第三种情况
       step8Case3(){
           if(!isRotating){
               let cube0 = getCubeByIndex(0);
@@ -1851,7 +1837,6 @@
       shuffle() {
         if(!isRotating && !isAutoSolve){
           const stepNum = parseInt(20 * Math.random())+1;
-              //let stepNum = 0;
           console.log('random rotate '+stepNum);
           const funcArr = [R,U,F,B,L,D,r,u,f,b,l,d];
           let stepArr = [];
