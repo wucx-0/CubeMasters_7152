@@ -12,8 +12,25 @@
 
 /*start of LearnPage styles*/
 
+.learnListScrollContainer {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+
+  flex: 1;
+  overflow-y: auto;
+  width: 100%;
+  max-width: 1100px;
+
+}
+
+
 .search {
   --padding: 14px;
+
+  position: sticky;
+  top: 0;
+  z-index: 2;
 
   width: max-content;
   display: flex;
@@ -55,6 +72,10 @@
 .learnListHeader {
   padding-top: 0px;
   margin-bottom: 0px;
+
+  position: sticky;
+  top: 60px; /* Adjust based on search bar height */
+  z-index: 1;
 }
 
 .learnList {
@@ -63,10 +84,10 @@
 
 .learnListHeaderItem {
   /* Layout */
-  width: 950px;
+  width: 1000px;
   height: 40px;
   display: grid;
-  grid-template-columns: 100px 120px 60px 380px 100px 120px;
+  grid-template-columns: 100px 120px 60px 380px 100px 100px 100px;
   align-items: center;
   justify-content: center;
 /*  padding-left: 00px;*/
@@ -85,8 +106,9 @@
 
 .learnListItem {
   /* Layout */
-  width: 950px;
-  height: 100px;
+  width: 1000px;
+  /*height: 100px;*/
+  min-height: 100px;
   display: flex;
   flex-direction: row;
   align-items: center;
@@ -132,6 +154,50 @@
 .stepsList {
   list-style-type: none;
   padding-left: 0; /* Also remove default padding if needed */
+}
+
+/* Grow-in animation */
+.learnListItem.grow-in {
+  animation: growIn 0.3s ease;
+}
+
+@keyframes growIn {
+  from {
+    transform: scale(0.5);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+/* Smooth shrink/fill effect for favoriting/unfavoriting */
+.learnListItem-wrapper {
+  transition: max-height 0.3s ease, margin 0.3s ease, opacity 0.3s ease;
+  max-height: 100px;
+  margin: 20px 0;
+  opacity: 1;
+}
+
+.learnListItem-wrapper.unfavoriting.start {
+  max-height: 0;
+  margin: 0;
+  opacity: 0;
+}
+
+.learnListItem {
+  transition: transform 0.3s ease, opacity 0.3s ease;
+  transform: scale(1);
+  opacity: 1;
+}
+
+.learnList{
+  padding-left: 10px;
+}
+
+.stepsList li {
+  white-space: nowrap;
 }
 
 .stepsListItem {
@@ -180,10 +246,25 @@ ul li span:nth-child(6) { /*favourite*/
   /*border: 1px solid var(--clr-dark);*/ /* Keep commented unless needed */
 }
 
-.favorite {
+ul li span:nth-child(7) { /*done*/
+  width: 100px;
+  text-align: center;
+  /*border: 1px solid var(--clr-dark);*/ /* Keep commented unless needed */
+}
+
+.favorite-button {
+  display: grid;
+  align-items: center;
+  justify-content: center;
+  padding-left: 20px;
+  /*border: 1px solid var(--clr-dark);*/  /*Keep commented unless needed*/
+}
+
+.done {
   display: flex;
   align-items: center;
   justify-content: center;
+  /*border: 1px solid var(--clr-dark);*/  /*Keep commented unless needed*/
 }
 
 /*end of LearnPage styles*/

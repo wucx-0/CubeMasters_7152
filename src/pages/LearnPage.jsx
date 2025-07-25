@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from "react";
-
 import { AlgDB } from "../components/LearnPage/AlgDB.js";
 import IconButton from "@mui/material/IconButton";
 import FavoriteBorder from "@mui/icons-material/FavoriteBorder";
@@ -7,19 +6,20 @@ import Favorite from "@mui/icons-material/Favorite";
 import { onAuthStateChanged } from "firebase/auth";
 import { db, auth } from "../firebase";
 import { doc, getDoc, setDoc } from "firebase/firestore";
-
 import "./pages.css";
 
 function LearnPage() {
   const [query, setQuery] = useState("");
   const [favorites, setFavorites] = useState({});
+  const [doneStatus, setDoneStatus] = useState({});
   const [originalOrder, setOriginalOrder] = useState([]);
+  const [growInAlg, setGrowInAlg] = useState(null);
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (user) => {
       if (user) {
         setOriginalOrder(AlgDB.map((alg) => alg.alg_id));
-        fetchFavorites(user.uid);
+        fetchUserStatus(user.uid);
       } else {
         setFavorites({});
       }
@@ -28,18 +28,21 @@ function LearnPage() {
     return () => unsubscribe();
   }, []);
 
-  const fetchFavorites = async (uid) => {
+  const fetchUserStatus = async (uid) => {
     try {
-      const docRef = doc(db, "favorites", uid);
-      const docSnap = await getDoc(docRef);
-      if (docSnap.exists()) {
-        setFavorites(docSnap.data());
-      } else {
-        setFavorites({});
-      }
+      // Fetch favorites
+      const favRef = doc(db, "favorites", uid);
+      const favSnap = await getDoc(favRef);
+      setFavorites(favSnap.exists() ? favSnap.data() : {});
+
+      // Fetch done
+      const doneRef = doc(db, "done", uid);
+      const doneSnap = await getDoc(doneRef);
+      setDoneStatus(doneSnap.exists() ? doneSnap.data() : {});
     } catch (error) {
-      console.error("Error fetching favorites:", error);
+      console.error("Error fetching user status:", error);
       setFavorites({});
+      setDoneStatus({});
     }
   };
 
@@ -47,17 +50,57 @@ function LearnPage() {
     const user = auth.currentUser;
     if (!user) return;
 
-    const newFavorites = {
-      ...favorites,
-      [algId]: !favorites[algId],
+    const isFavoriting = !favorites[algId];
+    const wrapper = document.querySelector(`div[data-algid="${algId}"]`);
+
+    if (!wrapper) return;
+
+    if (!isFavoriting) {
+      // UNFAVORITING: Shrink first, then update state
+      wrapper.classList.add("unfavoriting");
+      setTimeout(() => wrapper.classList.add("start"), 10);
+
+      setTimeout(() => {
+        wrapper.classList.remove("unfavoriting", "start");
+        const newFavorites = { ...favorites, [algId]: false };
+        setFavorites(newFavorites);
+        setDoc(doc(db, "favorites", user.uid), newFavorites).catch(
+          console.error,
+        );
+        setGrowInAlg(algId); // <-- triggers grow-in for new location
+      }, 300);
+    } else {
+      // FAVORITING: Shrink in place
+      wrapper.classList.add("unfavoriting");
+      setTimeout(() => wrapper.classList.add("start"), 10);
+
+      setTimeout(() => {
+        wrapper.classList.remove("unfavoriting", "start");
+        const newFavorites = { ...favorites, [algId]: true };
+        setFavorites(newFavorites);
+        setDoc(doc(db, "favorites", user.uid), newFavorites).catch(
+          console.error,
+        );
+        setGrowInAlg(algId); // <-- triggers grow-in for top
+      }, 300);
+    }
+  };
+
+  const toggleDone = async (algId) => {
+    const user = auth.currentUser;
+    if (!user) return;
+
+    const updatedDone = {
+      ...doneStatus,
+      [algId]: !doneStatus[algId],
     };
-    setFavorites(newFavorites);
+    setDoneStatus(updatedDone);
 
     try {
-      const docRef = doc(db, "favorites", user.uid);
-      await setDoc(docRef, newFavorites);
+      const docRef = doc(db, "done", user.uid);
+      await setDoc(docRef, updatedDone);
     } catch (error) {
-      console.error("Error saving favorite:", error);
+      console.error("Error saving done status:", error);
     }
   };
 
@@ -73,7 +116,6 @@ function LearnPage() {
       new RegExp(query, "i").test(alg.description),
   );
 
-  // Sort algorithms with favorites first (in original order), then non-favorites
   const sortedAlgorithms = [...filteredAlgorithms].sort((a, b) => {
     const aIsFavorite = favorites[a.alg_id];
     const bIsFavorite = favorites[b.alg_id];
@@ -111,56 +153,99 @@ function LearnPage() {
           <span className="alg_steps">Steps</span>
           <span className="description">Description</span>
           <span className="favorite">Favorite</span>
+          <span className="done">Done</span>
         </li>
       </ul>
 
-      <ul className="learnList">
-        {sortedAlgorithms.map((alg) => (
-          <li
-            key={alg.alg_id}
-            className={`learnListItem ${favorites[alg.alg_id] ? "favorited" : ""}`}
-          >
-            <span className="alg_img">
-              {alg.image && (
-                <img
-                  src={alg.image}
-                  alt={`${alg.alg_id} visualization`}
-                  className="algorithm-image"
-                />
-              )}
-            </span>
-            <span className="alg_cat">{alg.alg_cat}</span>
-            <span className="algcat_id">{alg.algcat_id}</span>
-            <span className="alg_steps">
-              <ul className="stepsList">
-                {alg.steps1 && <li>1) {alg.steps1}</li>}
-                {alg.steps2 && <li>2) {alg.steps2}</li>}
-                {alg.steps3 && <li>3) {alg.steps3}</li>}
-                {alg.steps4 && <li>4) {alg.steps4}</li>}
-              </ul>
-            </span>
-            <span className="description">{alg.description}</span>
-            <span className="favorite">
-              <IconButton
-                aria-label={
-                  favorites[alg.alg_id]
-                    ? "Remove from favorites"
-                    : "Add to favorites"
-                }
-                onClick={() => toggleFavorite(alg.alg_id)}
-                size="small"
-                disableRipple
+      <div className="learnListScrollContainer">
+        <ul className="learnList">
+          {sortedAlgorithms.map((alg) => (
+            <div
+              key={alg.alg_id}
+              data-algid={alg.alg_id}
+              className="learnListItem-wrapper"
+            >
+              <li
+                className={`learnListItem ${favorites[alg.alg_id] ? "favorited" : ""} ${alg.alg_id === growInAlg ? "grow-in" : ""}`}
+                onAnimationEnd={() => {
+                  if (growInAlg === alg.alg_id) {
+                    setGrowInAlg(null); // remove class after animation
+                  }
+                }}
               >
-                {favorites[alg.alg_id] ? (
-                  <Favorite color="error" />
-                ) : (
-                  <FavoriteBorder />
-                )}
-              </IconButton>
-            </span>
-          </li>
-        ))}
-      </ul>
+                <span className="alg_img">
+                  {alg.image && (
+                    <img
+                      src={alg.image}
+                      alt={`${alg.alg_id} visualization`}
+                      className="algorithm-image"
+                    />
+                  )}
+                </span>
+                <span className="alg_cat">{alg.alg_cat}</span>
+                <span className="algcat_id">{alg.algcat_id}</span>
+                <span className="alg_steps">
+                  <ul className="stepsList">
+                    {alg.steps1 && <li>1) {alg.steps1}</li>}
+                    {alg.steps2 && <li>2) {alg.steps2}</li>}
+                    {alg.steps3 && <li>3) {alg.steps3}</li>}
+                    {alg.steps4 && <li>4) {alg.steps4}</li>}
+                  </ul>
+                </span>
+                <span className="description">{alg.description}</span>
+                <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+                <span className="favorite-button">
+                  <IconButton
+                    aria-label={
+                      favorites[alg.alg_id]
+                        ? "Remove from favorites"
+                        : "Add to favorites"
+                    }
+                    onClick={() => toggleFavorite(alg.alg_id)}
+                    size="small"
+                    disableRipple
+                  >
+                    {favorites[alg.alg_id] ? (
+                      <Favorite color="error" />
+                    ) : (
+                      <FavoriteBorder />
+                    )}
+                  </IconButton>
+                </span>
+                <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+                <span className="done">
+                  <IconButton
+                    aria-label={
+                      doneStatus[alg.alg_id]
+                        ? "Mark as not done"
+                        : "Mark as done"
+                    }
+                    onClick={() => toggleDone(alg.alg_id)}
+                    size="small"
+                    disableRipple
+                  >
+                    {doneStatus[alg.alg_id] ? (
+                      <span
+                        className="material-symbols-outlined"
+                        style={{ color: "green" }}
+                      >
+                        check_circle
+                      </span>
+                    ) : (
+                      <span
+                        className="material-symbols-outlined"
+                        style={{ color: "gray" }}
+                      >
+                        radio_button_unchecked
+                      </span>
+                    )}
+                  </IconButton>
+                </span>
+              </li>
+            </div>
+          ))}
+        </ul>
+      </div>
     </div>
   );
 }
