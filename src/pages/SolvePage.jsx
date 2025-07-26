@@ -1,13 +1,30 @@
 import React from "react";
 import "./pages.css";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import RubiksCube from "../components/SolvePage/RubiksCube";
 
 const SolvePage = () => {
   return (
-    <div className="pages">
-      <h2>Solve Page</h2>
-      {/* Add your solve page here */}
-    </div>
+    <>
+      <div className="pages solve-page">
+        <div className="solve-container">
+          <div className="solve-left-panel">
+            <h2>Cube Solver</h2>
+            <div className="solve-instructions">
+              <h3>How to use:</h3>
+              <ul>
+                <li>Click "Random Shuffle" to scramble the cube</li>
+                <li>Use "Auto Solve" to see the layer-by-layer solution</li>
+                <li>Use keyboard controls: U/u, D/d, R/r, L/l, F/f, B/b</li>
+                <li>Uppercase = anticlockwise, lowercase = clockwise</li>
+              </ul>
+            </div>
+          </div>
+          <div className="solve-right-panel">
+            <RubiksCube />
+          </div>
+        </div>
+      </div>
+    </>
   );
 };
 
