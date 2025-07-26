@@ -1,6 +1,6 @@
 import React from "react";
 import "./pages.css";
-import RubiksCube from "../components/SolvePage/RubiksCube";
+import RubiksCube from "../components/SolvePage/RubiksCube.jsx";
 
 const SolvePage = () => {
   return (
