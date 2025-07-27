@@ -77,12 +77,12 @@ function Navbar() {
       <Link to="/timer" className="item Timer">
         Timer
       </Link>
-      <Link to="/friends" className="item Friends">
+      {/*<Link to="/friends" className="item Friends">
         Friends
       </Link>
       <Link to="/leaderboard" className="item Leaderboard">
         Leaderboard
-      </Link>
+      </Link>*/}
       <Link to="/settings" className="item Settings">
         Settings
       </Link>
