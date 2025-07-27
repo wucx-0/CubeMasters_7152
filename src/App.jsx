@@ -1,6 +1,7 @@
 import "./App.css";
 import { useState, useEffect } from "react";
-import { auth, onAuthStateChanged } from "./firebase";
+import { auth } from "./firebase";
+import { onAuthStateChanged } from "firebase/auth";
 import CubeApp from "./pages/CubeApp";
 import LoginPage from "./pages/LoginPage.jsx";
 

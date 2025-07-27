@@ -1,10 +1,5 @@
 import React from "react";
-import {
-  BrowserRouter as Router,
-  Routes,
-  Route,
-  Navigate,
-} from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 import Navbar from "../components/NavBar/NavBar.jsx";
 import PageContainer from "../components/PageContainer/PageContainer";
 import LoginPage from "./LoginPage";
@@ -20,55 +15,53 @@ import TimerPage from "./TimerPage.jsx";
 
 function CubeApp({ user }) {
   return (
-    <Router>
-      <div className="App app-container">
-        {user && <Navbar />}
-        <PageContainer>
-          <Routes>
+    <div className="App app-container">
+      {user && <Navbar />}
+      <PageContainer>
+        <Routes>
+          <Route
+            path="/login"
+            element={!user ? <LoginPage /> : <Navigate to="/learn" />}
+          />
+          <Route
+            path="/learn"
+            element={user ? <LearnPage /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/solve"
+            element={user ? <SolvePage /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/friends"
+            element={user ? <FriendsPage /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/leaderboard"
+            element={user ? <LeaderboardPage /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/settings"
+            element={user ? <SettingsPage /> : <Navigate to="/login" />}
+          >
+            <Route path="about" element={<SettingsAbout />} />
             <Route
-              path="/login"
-              element={!user ? <LoginPage /> : <Navigate to="/learn" />}
+              path="personalisation"
+              element={<SettingsPersonalisation />}
             />
-            <Route
-              path="/learn"
-              element={user ? <LearnPage /> : <Navigate to="/login" />}
-            />
-            <Route
-              path="/solve"
-              element={user ? <SolvePage /> : <Navigate to="/login" />}
-            />
-            <Route
-              path="/friends"
-              element={user ? <FriendsPage /> : <Navigate to="/login" />}
-            />
-            <Route
-              path="/leaderboard"
-              element={user ? <LeaderboardPage /> : <Navigate to="/login" />}
-            />
-            <Route
-              path="/settings"
-              element={user ? <SettingsPage /> : <Navigate to="/login" />}
-            >
-              <Route path="about" element={<SettingsAbout />} />
-              <Route path="personalisation" element={<SettingsPersonalisation />} />
-              <Route path="timer" element={<SettingsTimer />} />
-              <Route
-                index
-                element={<Navigate to="personalisation" replace />}
-              />
-            </Route>
-            <Route
-              path="/timer"
-              element={user ? <TimerPage /> : <Navigate to="/login" />}
-            />
-            <Route
-              path="/"
-              element={<Navigate to={user ? "/learn" : "/login"} />}
-            />
-          </Routes>
-        </PageContainer>
-      </div>
-    </Router>
+            <Route path="timer" element={<SettingsTimer />} />
+            <Route index element={<Navigate to="personalisation" replace />} />
+          </Route>
+          <Route
+            path="/timer"
+            element={user ? <TimerPage /> : <Navigate to="/login" />}
+          />
+          <Route
+            path="/"
+            element={<Navigate to={user ? "/learn" : "/login"} />}
+          />
+        </Routes>
+      </PageContainer>
+    </div>
   );
 }
 
