@@ -2,7 +2,7 @@ import React from "react";
 import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
 import { Button, TextField, MenuItem, CircularProgress } from "@mui/material";
-import { Divider } from '@mui/material';
+import { Divider } from "@mui/material";
 import { getAuth } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
 import { db } from "../../firebase";
@@ -15,17 +15,33 @@ const PersonalisationSchema = Yup.object().shape({
   name: Yup.string().required("Please enter your name"),
   username: Yup.string()
     .required("Please choose a username")
-    .min(3, "Username must be at least 3 characters")
+    .min(3)
     .matches(
       /^[a-zA-Z0-9_]+$/,
       "Only letters, numbers and underscores allowed",
     ),
   country: Yup.string().required("Please select your country"),
-  description: Yup.string().max(
-    200,
-    "Description must be 200 characters or less",
-  ),
+  description: Yup.string().max(200),
+  experienceLevel: Yup.string().required("Please select your experience level"),
+  mainEvent: Yup.string().required("Please select your main event"),
+  goals: Yup.string().max(100),
+  favoriteMethods: Yup.string().max(100),
 });
+
+const experienceLevels = ["Beginner", "Intermediate", "Advanced", "Pro"];
+
+const mainEvents = [
+  "3x3",
+  "2x2",
+  "OH",
+  "BLD",
+  "4x4",
+  "5x5",
+  "Mega",
+  "Pyraminx",
+];
+
+const methods = ["CFOP", "Roux", "ZZ", "Petrus", "Other"];
 
 const countries = [
   { value: "us", label: "United States" },
@@ -88,6 +104,10 @@ export default function PersonalisationForm() {
     username: localStorage.getItem("username") || "",
     country: localStorage.getItem("country") || "us",
     description: localStorage.getItem("description") || "",
+    experienceLevel: localStorage.getItem("experienceLevel") || "",
+    mainEvent: localStorage.getItem("mainEvent") || "",
+    goals: localStorage.getItem("goals") || "",
+    favoriteMethods: localStorage.getItem("favoriteMethods") || "",
   };
 
   const handleSubmit = async (values, { setSubmitting }) => {
@@ -105,7 +125,10 @@ export default function PersonalisationForm() {
             username: values.username,
             country: values.country,
             description: values.description,
-            lastUpdated: new Date().toISOString(),
+            experienceLevel: values.experienceLevel,
+            mainEvent: values.mainEvent,
+            goals: values.goals,
+            favoriteMethods: values.favoriteMethods,
           },
         },
         { merge: true },
@@ -215,13 +238,64 @@ export default function PersonalisationForm() {
                   as={TextField}
                   name="description"
                   multiline
-                  rows={3}
+                  rows={2}
                   fullWidth
                 />
               </div>
             </div>
 
-            <div style={{ height: 48 }} />
+            <div style={{ height: 24 }} />
+
+            <div className="form-row">
+              <label className="form-label">Experience Level:</label>
+              <div className="form-field">
+                <Field as={TextField} name="experienceLevel" select fullWidth>
+                  {experienceLevels.map((level) => (
+                    <MenuItem key={level} value={level}>
+                      {level}
+                    </MenuItem>
+                  ))}
+                </Field>
+              </div>
+            </div>
+
+            <div className="form-row">
+              <label className="form-label">Main Event:</label>
+              <div className="form-field">
+                <Field as={TextField} name="mainEvent" select fullWidth>
+                  {mainEvents.map((event) => (
+                    <MenuItem key={event} value={event}>
+                      {event}
+                    </MenuItem>
+                  ))}
+                </Field>
+              </div>
+            </div>
+
+            <div className="form-row">
+              <label className="form-label">Your Goals:</label>
+              <div className="form-field">
+                <Field
+                  as={TextField}
+                  name="goals"
+                  fullWidth
+                  placeholder="Sub-20, Learn OH, Blindfolded..."
+                />
+              </div>
+            </div>
+
+            <div className="form-row">
+              <label className="form-label">Favorite Methods:</label>
+              <div className="form-field">
+                <Field as={TextField} name="favoriteMethods" select fullWidth>
+                  {methods.map((method) => (
+                    <MenuItem key={method} value={method}>
+                      {method}
+                    </MenuItem>
+                  ))}
+                </Field>
+              </div>
+            </div>
 
             {/*edit as needed*/}
             {/*<div className="form-row">
