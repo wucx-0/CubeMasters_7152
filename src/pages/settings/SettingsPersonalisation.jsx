@@ -1,10 +1,15 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
-import { Button, TextField, MenuItem, CircularProgress } from "@mui/material";
-import { Divider } from "@mui/material";
+import {
+  Button,
+  TextField,
+  MenuItem,
+  CircularProgress,
+  Divider,
+} from "@mui/material";
 import { getAuth } from "firebase/auth";
-import { doc, setDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 import { db } from "../../firebase";
 
 import CustomButton from "../../components/CustomButton.jsx";
@@ -45,53 +50,15 @@ const methods = ["CFOP", "Roux", "ZZ", "Petrus", "Other"];
 
 const countries = [
   { value: "us", label: "United States" },
+  { value: "sg", label: "Singapore" },
   { value: "ca", label: "Canada" },
   { value: "uk", label: "United Kingdom" },
   { value: "au", label: "Australia" },
   { value: "de", label: "Germany" },
-  { value: "fr", label: "France" },
-  { value: "it", label: "Italy" },
-  { value: "es", label: "Spain" },
   { value: "jp", label: "Japan" },
   { value: "cn", label: "China" },
   { value: "in", label: "India" },
   { value: "br", label: "Brazil" },
-  { value: "mx", label: "Mexico" },
-  { value: "ru", label: "Russia" },
-  { value: "za", label: "South Africa" },
-  { value: "ng", label: "Nigeria" },
-  { value: "eg", label: "Egypt" },
-  { value: "sa", label: "Saudi Arabia" },
-  { value: "ae", label: "United Arab Emirates" },
-  { value: "kr", label: "South Korea" },
-  { value: "sg", label: "Singapore" },
-  { value: "nz", label: "New Zealand" },
-  { value: "se", label: "Sweden" },
-  { value: "no", label: "Norway" },
-  { value: "fi", label: "Finland" },
-  { value: "dk", label: "Denmark" },
-  { value: "nl", label: "Netherlands" },
-  { value: "be", label: "Belgium" },
-  { value: "ch", label: "Switzerland" },
-  { value: "at", label: "Austria" },
-  { value: "pt", label: "Portugal" },
-  { value: "gr", label: "Greece" },
-  { value: "tr", label: "Turkey" },
-  { value: "pl", label: "Poland" },
-  { value: "ie", label: "Ireland" },
-  { value: "ar", label: "Argentina" },
-  { value: "cl", label: "Chile" },
-  { value: "co", label: "Colombia" },
-  { value: "pe", label: "Peru" },
-  { value: "ve", label: "Venezuela" },
-  { value: "id", label: "Indonesia" },
-  { value: "my", label: "Malaysia" },
-  { value: "th", label: "Thailand" },
-  { value: "vn", label: "Vietnam" },
-  { value: "ph", label: "Philippines" },
-  { value: "pk", label: "Pakistan" },
-  { value: "bd", label: "Bangladesh" },
-  { value: "lk", label: "Sri Lanka" },
   // Add more as needed
 ];
 
@@ -99,46 +66,60 @@ export default function PersonalisationForm() {
   const auth = getAuth();
   const user = auth.currentUser;
 
-  const initialValues = {
-    name: localStorage.getItem("name") || "",
-    username: localStorage.getItem("username") || "",
-    country: localStorage.getItem("country") || "us",
-    description: localStorage.getItem("description") || "",
-    experienceLevel: localStorage.getItem("experienceLevel") || "",
-    mainEvent: localStorage.getItem("mainEvent") || "",
-    goals: localStorage.getItem("goals") || "",
-    favoriteMethods: localStorage.getItem("favoriteMethods") || "",
-  };
+  const [initialValues, setInitialValues] = useState({
+    name: "",
+    username: "",
+    country: "us",
+    description: "",
+    experienceLevel: "",
+    mainEvent: "",
+    goals: "",
+    favoriteMethods: "",
+  });
+
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!user) return;
+
+      try {
+        const docRef = doc(db, "users", user.uid);
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+          const data = docSnap.data()?.personalisation || {};
+          setInitialValues((prev) => ({
+            ...prev,
+            ...data,
+          }));
+        }
+      } catch (error) {
+        console.error("Error fetching personalisation data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [user]);
 
   const handleSubmit = async (values, { setSubmitting }) => {
     try {
-      if (!user) {
-        throw new Error("User not authenticated");
-      }
+      if (!user) throw new Error("User not authenticated");
 
-      // Save to Firestore
       await setDoc(
         doc(db, "users", user.uid),
         {
-          personalisation: {
-            name: values.name,
-            username: values.username,
-            country: values.country,
-            description: values.description,
-            experienceLevel: values.experienceLevel,
-            mainEvent: values.mainEvent,
-            goals: values.goals,
-            favoriteMethods: values.favoriteMethods,
-          },
+          personalisation: { ...values },
         },
         { merge: true },
       );
 
-      // Also save to localStorage for immediate access
-      localStorage.setItem("name", values.name);
-      localStorage.setItem("username", values.username);
-      localStorage.setItem("country", values.country);
-      localStorage.setItem("description", values.description);
+      // Optionally cache in localStorage
+      Object.keys(values).forEach((key) => {
+        localStorage.setItem(key, values[key]);
+      });
 
       alert("Profile updated successfully!");
     } catch (error) {
@@ -149,9 +130,18 @@ export default function PersonalisationForm() {
     }
   };
 
+  if (loading) {
+    return (
+      <div style={{ padding: 30, textAlign: "center" }}>
+        <CircularProgress />
+      </div>
+    );
+  }
+
   return (
     <div className="personalisation-form settings-container">
       <Formik
+        enableReinitialize
         initialValues={initialValues}
         validationSchema={PersonalisationSchema}
         onSubmit={handleSubmit}
@@ -193,37 +183,12 @@ export default function PersonalisationForm() {
                   name="country"
                   select
                   fullWidth
-                  SelectProps={{
-                    MenuProps: {
-                      anchorOrigin: {
-                        vertical: "bottom",
-                        horizontal: "left",
-                      },
-                      transformOrigin: {
-                        vertical: "top",
-                        horizontal: "left",
-                      },
-                      PaperProps: {
-                        style: {
-                          maxHeight: 200, // Shows about 5 items (adjust based on your item height)
-                          marginTop: 8, // Space between field and dropdown
-                        },
-                      },
-                    },
-                  }}
                   variant="outlined"
                   error={touched.country && !!errors.country}
                   helperText={touched.country && errors.country}
                 >
                   {countries.map((option) => (
-                    <MenuItem
-                      key={option.value}
-                      value={option.value}
-                      style={{
-                        height: 40, // Consistent item height
-                        padding: "8px 16px",
-                      }}
-                    >
+                    <MenuItem key={option.value} value={option.value}>
                       {option.label}
                     </MenuItem>
                   ))}
@@ -297,25 +262,11 @@ export default function PersonalisationForm() {
               </div>
             </div>
 
-            {/*edit as needed*/}
-            {/*<div className="form-row">
-              <label className="form-label">Next Setting:</label>
-              <div className="form-field description-field">
-                <Field
-                    as={TextField}
-                    name="nextsettingdescription"
-                    multiline
-                    rows={3}
-                    fullWidth
-                />
-              </div>
-            </div>*/}
-
             <div
               style={{
                 display: "flex",
                 justifyContent: "center",
-                marginTop: "20px",
+                marginTop: 20,
               }}
             >
               <CustomButton
