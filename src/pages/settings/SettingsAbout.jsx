@@ -21,7 +21,7 @@ export default function AboutPage() {
 
       <div style={{ height: 24 }} />
 
-      <Box sx={{ display: "flex", flexDirection: "row", gap: 4 }}>
+      <Box sx={{ display: "flex", flexDirection: "row", gap: 3 }}>
         {/* Column 1: Your Profile */}
         <Box sx={{ flex: 1, p: 3, borderRight: "2px solid grey" }}>
           <Box display="flex" alignItems="center" mb={2}>
@@ -38,11 +38,15 @@ export default function AboutPage() {
             sx={{ textAlign: "left", fontFamily: "Lexend, sans-serif" }}
           >
             <br />
-            Wei Jie is an avid speedcuber who is working on this project for his
-            orbitals project. He is inspired to create this project after
-            looking at online timer and algorithm webistes. He wishes to
-            implement creative features for this app to allow other cubers to
-            learn to solve the cube like him!
+            Wei Jie is an ardent software engineer, committed to improving his
+            skills and learn more about Software engineering through this
+            Orbitals project. He is also an avid speedcuber who is working on
+            this project for his orbitals project. He is inspired to create this
+            project after looking at online timer and algorithm websites. He
+            wishes to implement creative features for this app to allow other
+            cubers to learn to solve the cube like him! Through this project, he
+            hopes to practice and deepen my skills in UI/UX design and app
+            development!
           </Typography>
         </Box>
 
@@ -50,7 +54,7 @@ export default function AboutPage() {
         <Box sx={{ flex: 1, p: 3 }}>
           <Box display="flex" alignItems="center" mb={2}>
             <Avatar
-              src="/path/to/cx/photo.jpg"
+              src="/images/chenxiaopfp.jpg"
               sx={{ width: 80, height: 80, mr: 3 }}
             />
             <Typography variant="h5" sx={{ fontFamily: "Lexend, sans-serif" }}>
@@ -61,9 +65,15 @@ export default function AboutPage() {
             variant="body1"
             sx={{ textAlign: "left", fontFamily: "Lexend, sans-serif" }}
           >
-            <br />
-            Description: Ut enim ad minim veniam, quis nostrud exercitation
-            ullamco laboris nisi ut aliquip ex ea commodo consequat.
+            <br /> Chenxiao is a passionate software engineer who has worked on
+            past projects like Connect 4 and other interactive games. Eager to
+            take on the challenge of visualizing the Rubik’s Cube in this
+            Orbital project, I aim to deepen my understanding of UI/UX
+            design—exploring intuitive interfaces, smooth animations, and
+            user-friendly interactions. Through this project, I hope to refine
+            my skills in frontend development, 3D rendering, and state
+            management while creating a tool that helps cubers learn and
+            practice efficiently.
           </Typography>
         </Box>
       </Box>
