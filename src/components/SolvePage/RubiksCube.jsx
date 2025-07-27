@@ -5,16 +5,18 @@ import './RubiksCube.css';
 
 
 const RubiksCube = () => {
-    const mountRef = useRef(null);
-    const cubeRef = useRef(null);
-    const rendererRef = useRef(null);
-    const controlsRef = useRef(null);
-    const [currentStep, setCurrentStep] = useState('Ready');
-    const [moveCount, setMoveCount] = useState(0);
-    const [stepCount, setStepCount] = useState(0);
-    const [currentMove, setCurrentMove] = useState('-');
-    const [moveSequence, setMoveSequence] = useState('-');
-    const [errorMessage, setErrorMessage] = useState('');
+  const mountRef = useRef(null);
+  const cubeRef = useRef(null);
+  const rendererRef = useRef(null);
+  const controlsRef = useRef(null);
+  const [currentStep, setCurrentStep] = useState('Ready');
+  const [moveCount, setMoveCount] = useState(0);
+  const [stepCount, setStepCount] = useState(0);
+  const [currentMove, setCurrentMove] = useState('-');
+  const [moveSequence, setMoveSequence] = useState('-');
+  const [errorMessage, setErrorMessage] = useState('');
+  const [nextMoveReady, setNextMoveReady] = useState(false);
+  const [stepSolveActive, setStepSolveActive] = useState(false);
 
 
     // Axis constants as instance properties
@@ -36,7 +38,7 @@ const RubiksCube = () => {
     const scene = new THREE.Scene();
     scene.background = new THREE.Color(0x222222);
 
-    const camera = new THREE.PerspectiveCamera(45, width / height, 1, 10000);
+    const camera = new THREE.PerspectiveCamera(35, width / height, 1, 10000); 
     camera.position.set(400, 400, 400);
     const viewCenter = new THREE.Vector3(0, 0, 0);
     camera.up.set(0, 1, 0);
@@ -47,8 +49,8 @@ const RubiksCube = () => {
       const controls = new OrbitControls(camera, renderer.domElement);
       controls.enableDamping = true;
       controls.dampingFactor = 0.5;
-      controls.minDistance = 200;
-      controls.maxDistance = 600;
+      controls.minDistance = 300; // Increased from 200
+      controls.maxDistance = 800; // Increased from 600
       controls.target = viewCenter;
       controlsRef.current = controls;
 
@@ -59,7 +61,9 @@ const RubiksCube = () => {
         setStepCount,
         setCurrentMove,
         setMoveSequence,
-        setErrorMessage
+        setErrorMessage,
+        setNextMoveReady,
+        setStepSolveActive
       });
 
       cubeRef.current = cube;
@@ -111,6 +115,9 @@ const RubiksCube = () => {
   const handleScramble = () => cubeRef.current?.scramble();
   const handleAutoSolve = () => cubeRef.current?.autoSolve();
   const handleStop = () => cubeRef.current?.stopSolve();
+  const handleNextMove = () => cubeRef.current?.nextMove();
+  const handleStepSolve = () => cubeRef.current?.stepSolve();
+  const handleReset = () => cubeRef.current?.reset();
 
   return (
     <div className="rubiks-cube-container">
@@ -124,6 +131,22 @@ const RubiksCube = () => {
           <button onClick={handleScramble}>Scramble</button>
           <button onClick={handleAutoSolve}>Auto Solve</button>
           <button onClick={handleStop}>Stop</button>
+          <button onClick={handleReset}>Reset</button>
+        </div>
+        
+        <div className="step-control-buttons">
+          <button 
+            onClick={handleNextMove}
+            disabled={!nextMoveReady || currentStep === 'Solved!'}
+          >
+            &gt;
+          </button>
+          <button 
+            onClick={handleStepSolve}
+            disabled={stepSolveActive || currentStep === 'Solved!'}
+          >
+            &gt;&gt;
+          </button>
         </div>
         
         <div className="cube-info">
@@ -161,6 +184,10 @@ class RubiksCubeClass {
     this.stepCount = 0;
     this.currentStep = 1;
     this.minCubeIndex = 101;
+    this.nextMoveQueue = [];
+    this.isStepSolving = false;
+    this.setNextMoveReady = uiCallbacks.setNextMoveReady || (() => {});
+    this.setStepSolveActive = uiCallbacks.setStepSolveActive || (() => {});
     
     // Algorithm specific properties
     this.bottomColor = null;
@@ -310,13 +337,185 @@ class RubiksCubeClass {
     
     return canvas;
   }
+  nextMove() {
+    if (this.isRotating || this.isAutoSolve || this.nextMoveQueue.length === 0) return;
+    
+    const nextMove = this.nextMoveQueue.shift();
+    if (nextMove) {
+      this.isRotating = true;
+      nextMove.call(this, 0, () => {
+        this.updateNextMoveUI();
+      });
+    }
+  }
+  stepSolve() {
+    if (this.isRotating || this.isAutoSolve) return;
+    
+    this.isStepSolving = true;
+    this.setStepSolveActive(true);
+    this.prepareNextStep();
+  }
+
+  prepareNextStep() {
+    if (!this.isStepSolving) return;
+    
+    // Determine next moves based on current step
+    this.nextMoveQueue = [];
+    
+    if (this.checkStep8()) {
+      this.isStepSolving = false;
+      this.setStepSolveActive(false);
+      this.uiCallbacks.setCurrentStep('Solved!');
+      return;
+    }
+    
+    // Get current step and prepare moves
+    if (!this.checkStep1()) {
+      this.currentStep = 1;
+      this.prepareStep1Moves();
+    } else if (!this.checkStep2()) {
+      this.currentStep = 2;
+      this.prepareStep2Moves();
+    } else if (!this.checkStep3()) {
+      this.currentStep = 3;
+      this.prepareStep3Moves();
+    } else if (!this.checkStep4()) {
+      this.currentStep = 4;
+      this.prepareStep4Moves();
+    } else if (!this.checkStep5()) {
+      this.currentStep = 5;
+      this.prepareStep5Moves();
+    } else if (!this.checkStep6()) {
+      this.currentStep = 6;
+      this.prepareStep6Moves();
+    } else if (!this.checkStep7()) {
+      this.currentStep = 7;
+      this.prepareStep7Moves();
+    } else {
+      this.currentStep = 8;
+      this.prepareStep8Moves();
+    }
+    
+    this.executeStepMoves();
+  }
+
+  executeStepMoves() {
+    if (!this.isStepSolving || this.nextMoveQueue.length === 0) {
+      this.isStepSolving = false;
+      this.setStepSolveActive(false);
+      this.updateNextMoveUI();
+      return;
+    }
+    
+    const move = this.nextMoveQueue.shift();
+    if (move) {
+      move.call(this, 0, () => {
+        // Check if step is complete
+        const stepComplete = this.checkCurrentStep();
+        if (stepComplete) {
+          this.isStepSolving = false;
+          this.setStepSolveActive(false);
+          this.updateNextMoveUI();
+        } else {
+          setTimeout(() => this.executeStepMoves(), 100);
+        }
+      });
+    }
+  }
+
+  checkCurrentStep() {
+    switch(this.currentStep) {
+      case 1: return this.checkStep1();
+      case 2: return this.checkStep2();
+      case 3: return this.checkStep3();
+      case 4: return this.checkStep4();
+      case 5: return this.checkStep5();
+      case 6: return this.checkStep6();
+      case 7: return this.checkStep7();
+      case 8: return this.checkStep8();
+      default: return false;
+    }
+  }
+
+  prepareStep1Moves() {
+    // Simplified step 1 preparation - just add a few basic moves
+    this.nextMoveQueue = [this.F, this.R, this.U, this.r, this.u, this.f];
+  }
+
+  prepareStep2Moves() {
+    this.nextMoveQueue = [this.R, this.U, this.r, this.u];
+  }
+
+  prepareStep3Moves() {
+    this.nextMoveQueue = [this.R, this.U, this.r];
+  }
+
+  prepareStep4Moves() {
+    this.nextMoveQueue = [this.r, this.u, this.r, this.u, this.r, this.U, this.R, this.U, this.R];
+  }
+
+  prepareStep5Moves() {
+    this.nextMoveQueue = [this.r, this.u, this.f, this.U, this.F, this.R];
+  }
+
+  prepareStep6Moves() {
+    this.nextMoveQueue = [this.r, this.U, this.L, this.u, this.R, this.U, this.l, this.u];
+  }
+
+  prepareStep7Moves() {
+    this.nextMoveQueue = [this.F, this.F, this.U, this.r, this.L, this.F, this.F, this.R, this.l, this.U, this.F, this.F];
+  }
+
+  prepareStep8Moves() {
+    this.nextMoveQueue = [this.R, this.R, this.B, this.B, this.R, this.F, this.r, this.B, this.B, this.R, this.f, this.R];
+  }
+
+  updateNextMoveUI() {
+    const hasNextMove = this.nextMoveQueue.length > 0;
+    this.setNextMoveReady(hasNextMove);
+    
+    if (hasNextMove) {
+      const nextMove = this.nextMoveQueue[0];
+      const moveName = this.getMoveNameFromFunction(nextMove);
+      this.uiCallbacks.setCurrentMove(moveName);
+    } else {
+      this.uiCallbacks.setCurrentMove('-');
+    }
+  }
+
+  getMoveNameFromFunction(moveFunc) {
+    const moveMappings = {
+      [this.R]: 'R', [this.r]: 'r', [this.L]: 'L', [this.l]: 'l',
+      [this.U]: 'U', [this.u]: 'u', [this.D]: 'D', [this.d]: 'd',
+      [this.F]: 'F', [this.f]: 'f', [this.B]: 'B', [this.b]: 'b'
+    };
+    return moveMappings[moveFunc] || '?';
+  }
+
+  reset() {
+    this.isAutoSolve = false;
+    this.isRotating = false;
+    this.isStepSolving = false;
+    this.nextMoveQueue = [];
+    this.moveCount = 0;
+    this.stepCount = 0;
+    this.currentStep = 0;
+    
+    this.initialize();
+    this.updateUI();
+    this.setNextMoveReady(false);
+    this.setStepSolveActive(false);
+    this.uiCallbacks.setCurrentMove('-');
+    this.uiCallbacks.setMoveSequence('-');
+    this.uiCallbacks.setErrorMessage('');
+  }
 
   setupEventListeners() {
     // Mouse events - attach to the renderer's DOM element
     const canvas = this.scene.children.find(child => child.parent?.domElement) || 
                    document.querySelector('canvas') || 
                    this.camera.parent?.domElement;
-    
+    /*
     // Use document for global events
     document.addEventListener('mousedown', (e) => this.startCube(e), false);
     document.addEventListener('mousemove', (e) => this.moveCube(e), false);
@@ -326,6 +525,7 @@ class RubiksCubeClass {
     document.addEventListener('touchstart', (e) => this.startCube(e), false);
     document.addEventListener('touchmove', (e) => this.moveCube(e), false);
     document.addEventListener('touchend', () => this.stopCube(), false);
+    */
     
     // Keyboard events
     document.addEventListener('keydown', (e) => this.handleKeyboard(e), false);
