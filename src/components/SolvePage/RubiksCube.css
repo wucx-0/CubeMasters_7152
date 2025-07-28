@@ -107,3 +107,12 @@
   color: #ff4444;
   font-size: 12px;
 }
+
+.move-log {
+  font-size: 12px;
+  color: #ccc;
+  margin: 8px 0;
+  word-wrap: break-word;
+  max-height: 60px;
+  overflow-y: auto;
+}

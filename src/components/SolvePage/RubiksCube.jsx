@@ -17,6 +17,7 @@ const RubiksCube = () => {
   const [errorMessage, setErrorMessage] = useState('');
   const [nextMoveReady, setNextMoveReady] = useState(false);
   const [stepSolveActive, setStepSolveActive] = useState(false);
+  const [moveLog, setMoveLog] = useState('');
 
 
     // Axis constants as instance properties
@@ -63,7 +64,8 @@ const RubiksCube = () => {
         setMoveSequence,
         setErrorMessage,
         setNextMoveReady,
-        setStepSolveActive
+        setStepSolveActive,
+        setMoveLog 
       });
 
       cubeRef.current = cube;
@@ -128,8 +130,6 @@ const RubiksCube = () => {
       <div className="cube-controls">
         <div className="control-buttons">
           <button onClick={handleRandomRotate}>Shuffle</button>
-          <button onClick={handleScramble}>Scramble</button>
-          <button onClick={handleAutoSolve}>Auto Solve</button>
           <button onClick={handleStop}>Stop</button>
           <button onClick={handleReset}>Reset</button>
         </div>
@@ -157,6 +157,11 @@ const RubiksCube = () => {
           <div className="current-move">
             Next: {currentMove}
           </div>
+          {moveLog && (
+            <div className="move-log">
+              <strong>Moves:</strong> {moveLog}
+            </div>
+          )}
           {errorMessage && (
             <div className="error-message">{errorMessage}</div>
           )}
@@ -172,6 +177,10 @@ class RubiksCubeClass {
     this.camera = camera;
     this.controls = controls;
     this.uiCallbacks = uiCallbacks;
+
+    this.moveLog = [];
+    this.currentStepMoves = [];
+    this.setMoveLog = uiCallbacks.setMoveLog || (() => {});
     
     this.x = 0;
     this.y = 0;
@@ -337,173 +346,58 @@ class RubiksCubeClass {
     
     return canvas;
   }
+
   nextMove() {
-    if (this.isRotating || this.isAutoSolve || this.nextMoveQueue.length === 0) return;
+    if (this.isRotating || !this.isAutoSolve) return;
     
-    const nextMove = this.nextMoveQueue.shift();
-    if (nextMove) {
-      this.isRotating = true;
-      nextMove.call(this, 0, () => {
-        this.updateNextMoveUI();
-      });
-    }
+    // Execute current step
+    this.executeCurrentStep();
   }
+
   stepSolve() {
     if (this.isRotating || this.isAutoSolve) return;
     
-    this.isStepSolving = true;
+    this.isAutoSolve = true;
     this.setStepSolveActive(true);
-    this.prepareNextStep();
+    
+    // Get top and bottom colors if not set
+    if (!this.topColor) {
+      const topCenter = this.getCubeByIndex(10);
+      this.topColor = this.getFaceColorByVector(topCenter, this.YLine);
+      this.bottomColor = this.getOppositeColor(this.topColor);
+    }
+    
+    this.determineCurrentStep();
+    this.executeCurrentStep();
   }
 
-  prepareNextStep() {
-    if (!this.isStepSolving) return;
+  executeCurrentStep() {
+    if (this.isRotating) return;
     
-    // Determine next moves based on current step
-    this.nextMoveQueue = [];
-    
-    if (this.checkStep8()) {
-      this.isStepSolving = false;
-      this.setStepSolveActive(false);
-      this.uiCallbacks.setCurrentStep('Solved!');
-      return;
-    }
-    
-    // Get current step and prepare moves
-    if (!this.checkStep1()) {
-      this.currentStep = 1;
-      this.prepareStep1Moves();
-    } else if (!this.checkStep2()) {
-      this.currentStep = 2;
-      this.prepareStep2Moves();
-    } else if (!this.checkStep3()) {
-      this.currentStep = 3;
-      this.prepareStep3Moves();
-    } else if (!this.checkStep4()) {
-      this.currentStep = 4;
-      this.prepareStep4Moves();
-    } else if (!this.checkStep5()) {
-      this.currentStep = 5;
-      this.prepareStep5Moves();
-    } else if (!this.checkStep6()) {
-      this.currentStep = 6;
-      this.prepareStep6Moves();
-    } else if (!this.checkStep7()) {
-      this.currentStep = 7;
-      this.prepareStep7Moves();
-    } else {
-      this.currentStep = 8;
-      this.prepareStep8Moves();
-    }
-    
-    this.executeStepMoves();
-  }
-
-  executeStepMoves() {
-    if (!this.isStepSolving || this.nextMoveQueue.length === 0) {
-      this.isStepSolving = false;
-      this.setStepSolveActive(false);
-      this.updateNextMoveUI();
-      return;
-    }
-    
-    const move = this.nextMoveQueue.shift();
-    if (move) {
-      move.call(this, 0, () => {
-        // Check if step is complete
-        const stepComplete = this.checkCurrentStep();
-        if (stepComplete) {
-          this.isStepSolving = false;
-          this.setStepSolveActive(false);
-          this.updateNextMoveUI();
-        } else {
-          setTimeout(() => this.executeStepMoves(), 100);
-        }
-      });
-    }
-  }
-
-  checkCurrentStep() {
     switch(this.currentStep) {
-      case 1: return this.checkStep1();
-      case 2: return this.checkStep2();
-      case 3: return this.checkStep3();
-      case 4: return this.checkStep4();
-      case 5: return this.checkStep5();
-      case 6: return this.checkStep6();
-      case 7: return this.checkStep7();
-      case 8: return this.checkStep8();
-      default: return false;
+      case 1: this.step1(); break;
+      case 2: this.step2(); break;
+      case 3: this.step3(); break;
+      case 4: this.step4(); break;
+      case 5: this.step5(); break;
+      case 6: this.step6(); break;
+      case 7: this.step7(); break;
+      case 8: this.step8(); break;
     }
   }
 
-  prepareStep1Moves() {
-    // Simplified step 1 preparation - just add a few basic moves
-    this.nextMoveQueue = [this.F, this.R, this.U, this.r, this.u, this.f];
-  }
-
-  prepareStep2Moves() {
-    this.nextMoveQueue = [this.R, this.U, this.r, this.u];
-  }
-
-  prepareStep3Moves() {
-    this.nextMoveQueue = [this.R, this.U, this.r];
-  }
-
-  prepareStep4Moves() {
-    this.nextMoveQueue = [this.r, this.u, this.r, this.u, this.r, this.U, this.R, this.U, this.R];
-  }
-
-  prepareStep5Moves() {
-    this.nextMoveQueue = [this.r, this.u, this.f, this.U, this.F, this.R];
-  }
-
-  prepareStep6Moves() {
-    this.nextMoveQueue = [this.r, this.U, this.L, this.u, this.R, this.U, this.l, this.u];
-  }
-
-  prepareStep7Moves() {
-    this.nextMoveQueue = [this.F, this.F, this.U, this.r, this.L, this.F, this.F, this.R, this.l, this.U, this.F, this.F];
-  }
-
-  prepareStep8Moves() {
-    this.nextMoveQueue = [this.R, this.R, this.B, this.B, this.R, this.F, this.r, this.B, this.B, this.R, this.f, this.R];
-  }
-
-  updateNextMoveUI() {
-    const hasNextMove = this.nextMoveQueue.length > 0;
-    this.setNextMoveReady(hasNextMove);
-    
-    if (hasNextMove) {
-      const nextMove = this.nextMoveQueue[0];
-      const moveName = this.getMoveNameFromFunction(nextMove);
-      this.uiCallbacks.setCurrentMove(moveName);
-    } else {
-      this.uiCallbacks.setCurrentMove('-');
-    }
-  }
-
-  getMoveNameFromFunction(moveFunc) {
-    const moveMappings = {
-      [this.R]: 'R', [this.r]: 'r', [this.L]: 'L', [this.l]: 'l',
-      [this.U]: 'U', [this.u]: 'u', [this.D]: 'D', [this.d]: 'd',
-      [this.F]: 'F', [this.f]: 'f', [this.B]: 'B', [this.b]: 'b'
-    };
-    return moveMappings[moveFunc] || '?';
-  }
 
   reset() {
     this.isAutoSolve = false;
     this.isRotating = false;
-    this.isStepSolving = false;
-    this.nextMoveQueue = [];
     this.moveCount = 0;
     this.stepCount = 0;
     this.currentStep = 0;
     
+    this.clearMoveLog();
+    
     this.initialize();
     this.updateUI();
-    this.setNextMoveReady(false);
     this.setStepSolveActive(false);
     this.uiCallbacks.setCurrentMove('-');
     this.uiCallbacks.setMoveSequence('-');
@@ -1065,128 +959,140 @@ updateCubeIndex(elements) {
 
     // Basic rotation methods (U, D, R, L, F, B and their inverses)
     // Remember: Uppercase = anticlockwise, lowercase = clockwise
-    U(rotateNum = 0, next = null) {
-    this.stepCount++;
-    this.moveCount++;
-    const cube2 = this.getCubeByIndex(2, rotateNum);
-    const zLine = this.rotateAxisByYLine(this.ZLine, rotateNum);
-    const xLineAd = this.rotateAxisByYLine(this.XLineAd, rotateNum);
-    this.normalize = zLine;
-    this.rotateMove(cube2, xLineAd, next);
-    this.updateUI();
-    }
-
-    u(rotateNum = 0, next = null) {
-    this.stepCount++;
-    this.moveCount++;
-    const cube2 = this.getCubeByIndex(2, rotateNum);
-    const xLine = this.rotateAxisByYLine(this.XLine, rotateNum);
-    const zLineAd = this.rotateAxisByYLine(this.ZLineAd, rotateNum);
-    this.normalize = xLine;
-    this.rotateMove(cube2, zLineAd, next);
-    this.updateUI();
-    }
-
-    D(rotateNum = 0, next = null) {
-    this.stepCount++;
-    this.moveCount++;
-    const cube8 = this.getCubeByIndex(8, rotateNum);
-    const xLine = this.rotateAxisByYLine(this.XLine, rotateNum);
-    const zLineAd = this.rotateAxisByYLine(this.ZLineAd, rotateNum);
-    this.normalize = xLine;
-    this.rotateMove(cube8, zLineAd, next);
-    this.updateUI();
-    }
-
-    d(rotateNum = 0, next = null) {
-    this.stepCount++;
-    this.moveCount++;
-    const cube8 = this.getCubeByIndex(8, rotateNum);
-    const zLine = this.rotateAxisByYLine(this.ZLine, rotateNum);
-    const xLineAd = this.rotateAxisByYLine(this.XLineAd, rotateNum);
-    this.normalize = zLine;
-    this.rotateMove(cube8, xLineAd, next);
-    this.updateUI();
-    }
-
     R(rotateNum = 0, next = null) {
-    this.stepCount++;
-    this.moveCount++;
-    const cube2 = this.getCubeByIndex(2, rotateNum);
-    const zLineAd = this.rotateAxisByYLine(this.ZLineAd, rotateNum);
-    this.normalize = this.YLine;
-    this.rotateMove(cube2, zLineAd, next);
-    this.updateUI();
+      this.stepCount++;
+      this.moveCount++;
+      this.logMove('R');
+      const cube2 = this.getCubeByIndex(2, rotateNum);
+      const zLineAd = this.rotateAxisByYLine(this.ZLineAd, rotateNum);
+      this.normalize = this.YLine;
+      this.rotateMove(cube2, zLineAd, next);
+      this.updateUI();
     }
 
     r(rotateNum = 0, next = null) {
-    this.stepCount++;
-    this.moveCount++;
-    const cube2 = this.getCubeByIndex(2, rotateNum);
-    const zLine = this.rotateAxisByYLine(this.ZLine, rotateNum);
-    this.normalize = zLine;
-    this.rotateMove(cube2, this.YLineAd, next);
-    this.updateUI();
+      this.stepCount++;
+      this.moveCount++;
+      this.logMove('r');
+      const cube2 = this.getCubeByIndex(2, rotateNum);
+      const zLine = this.rotateAxisByYLine(this.ZLine, rotateNum);
+      this.normalize = zLine;
+      this.rotateMove(cube2, this.YLineAd, next);
+      this.updateUI();
     }
 
     L(rotateNum = 0, next = null) {
-    this.stepCount++;
-    this.moveCount++;
-    const cube0 = this.getCubeByIndex(0, rotateNum);
-    const zLine = this.rotateAxisByYLine(this.ZLine, rotateNum);
-    this.normalize = zLine;
-    this.rotateMove(cube0, this.YLineAd, next);
-    this.updateUI();
+      this.stepCount++;
+      this.moveCount++;
+      this.logMove('L');
+      const cube0 = this.getCubeByIndex(0, rotateNum);
+      const zLine = this.rotateAxisByYLine(this.ZLine, rotateNum);
+      this.normalize = zLine;
+      this.rotateMove(cube0, this.YLineAd, next);
+      this.updateUI();
     }
 
     l(rotateNum = 0, next = null) {
-    this.stepCount++;
-    this.moveCount++;
-    const cube0 = this.getCubeByIndex(0, rotateNum);
-    const zLineAd = this.rotateAxisByYLine(this.ZLineAd, rotateNum);
-    this.normalize = this.YLine;
-    this.rotateMove(cube0, zLineAd, next);
-    this.updateUI();
+      this.stepCount++;
+      this.moveCount++;
+      this.logMove('l');
+      const cube0 = this.getCubeByIndex(0, rotateNum);
+      const zLineAd = this.rotateAxisByYLine(this.ZLineAd, rotateNum);
+      this.normalize = this.YLine;
+      this.rotateMove(cube0, zLineAd, next);
+      this.updateUI();
+    }
+
+    U(rotateNum = 0, next = null) {
+      this.stepCount++;
+      this.moveCount++;
+      this.logMove('U');
+      const cube2 = this.getCubeByIndex(2, rotateNum);
+      const zLine = this.rotateAxisByYLine(this.ZLine, rotateNum);
+      const xLineAd = this.rotateAxisByYLine(this.XLineAd, rotateNum);
+      this.normalize = zLine;
+      this.rotateMove(cube2, xLineAd, next);
+      this.updateUI();
+    }
+
+    u(rotateNum = 0, next = null) {
+      this.stepCount++;
+      this.moveCount++;
+      this.logMove('u');
+      const cube2 = this.getCubeByIndex(2, rotateNum);
+      const xLine = this.rotateAxisByYLine(this.XLine, rotateNum);
+      const zLineAd = this.rotateAxisByYLine(this.ZLineAd, rotateNum);
+      this.normalize = xLine;
+      this.rotateMove(cube2, zLineAd, next);
+      this.updateUI();
+    }
+
+    D(rotateNum = 0, next = null) {
+      this.stepCount++;
+      this.moveCount++;
+      this.logMove('D');
+      const cube8 = this.getCubeByIndex(8, rotateNum);
+      const xLine = this.rotateAxisByYLine(this.XLine, rotateNum);
+      const zLineAd = this.rotateAxisByYLine(this.ZLineAd, rotateNum);
+      this.normalize = xLine;
+      this.rotateMove(cube8, zLineAd, next);
+      this.updateUI();
+    }
+
+    d(rotateNum = 0, next = null) {
+      this.stepCount++;
+      this.moveCount++;
+      this.logMove('d');
+      const cube8 = this.getCubeByIndex(8, rotateNum);
+      const zLine = this.rotateAxisByYLine(this.ZLine, rotateNum);
+      const xLineAd = this.rotateAxisByYLine(this.XLineAd, rotateNum);
+      this.normalize = zLine;
+      this.rotateMove(cube8, xLineAd, next);
+      this.updateUI();
     }
 
     F(rotateNum = 0, next = null) {
-    this.stepCount++;
-    this.moveCount++;
-    const cube2 = this.getCubeByIndex(2, rotateNum);
-    const xLine = this.rotateAxisByYLine(this.XLine, rotateNum);
-    this.normalize = xLine;
-    this.rotateMove(cube2, this.YLineAd, next);
-    this.updateUI();
+      this.stepCount++;
+      this.moveCount++;
+      this.logMove('F');
+      const cube2 = this.getCubeByIndex(2, rotateNum);
+      const xLine = this.rotateAxisByYLine(this.XLine, rotateNum);
+      this.normalize = xLine;
+      this.rotateMove(cube2, this.YLineAd, next);
+      this.updateUI();
     }
 
     f(rotateNum = 0, next = null) {
-    this.stepCount++;
-    this.moveCount++;
-    const cube2 = this.getCubeByIndex(2, rotateNum);
-    const xLineAd = this.rotateAxisByYLine(this.XLineAd, rotateNum);
-    this.normalize = this.YLine;
-    this.rotateMove(cube2, xLineAd, next);
-    this.updateUI();
+      this.stepCount++;
+      this.moveCount++;
+      this.logMove('f');
+      const cube2 = this.getCubeByIndex(2, rotateNum);
+      const xLineAd = this.rotateAxisByYLine(this.XLineAd, rotateNum);
+      this.normalize = this.YLine;
+      this.rotateMove(cube2, xLineAd, next);
+      this.updateUI();
     }
 
     B(rotateNum = 0, next = null) {
-    this.stepCount++;
-    this.moveCount++;
-    const cube20 = this.getCubeByIndex(20, rotateNum);
-    const xLine = this.rotateAxisByYLine(this.XLine, rotateNum);
-    this.normalize = xLine;
-    this.rotateMove(cube20, this.YLine, next);
-    this.updateUI();
+      this.stepCount++;
+      this.moveCount++;
+      this.logMove('B');
+      const cube20 = this.getCubeByIndex(20, rotateNum);
+      const xLine = this.rotateAxisByYLine(this.XLine, rotateNum);
+      this.normalize = xLine;
+      this.rotateMove(cube20, this.YLine, next);
+      this.updateUI();
     }
 
     b(rotateNum = 0, next = null) {
-    this.stepCount++;
-    this.moveCount++;
-    const cube20 = this.getCubeByIndex(20, rotateNum);
-    const xLine = this.rotateAxisByYLine(this.XLine, rotateNum);
-    this.normalize = xLine;
-    this.rotateMove(cube20, this.YLineAd, next);
-    this.updateUI();
+      this.stepCount++;
+      this.moveCount++;
+      this.logMove('b');
+      const cube20 = this.getCubeByIndex(20, rotateNum);
+      const xLine = this.rotateAxisByYLine(this.XLine, rotateNum);
+      this.normalize = xLine;
+      this.rotateMove(cube20, this.YLineAd, next);
+      this.updateUI();
     }
 
     // Execute a sequence of moves
@@ -1205,6 +1111,22 @@ updateCubeIndex(elements) {
         }
         });
     }
+    }
+    logMove(move) {
+      this.moveLog.push(move);
+      this.currentStepMoves.push(move);
+      this.updateMoveLog();
+    }
+
+    updateMoveLog() {
+      const logString = this.moveLog.join(' ');
+      this.setMoveLog(logString);
+    }
+
+    clearMoveLog() {
+      this.moveLog = [];
+      this.currentStepMoves = [];
+      this.updateMoveLog();
     }
 
     // Random shuffle
@@ -1234,150 +1156,148 @@ updateCubeIndex(elements) {
 
     // Predetermined scramble
     scramble() {
-    if (this.isRotating || this.isAutoSolve) return;
-    
-    // The scramble sequence from your original code
-    const scrambleSequence = [
+      if (this.isRotating || this.isAutoSolve) return;
+      
+      const scrambleSequence = [
         'R', 'U', 'R', 'U', 'R', 'u', 'r', 'u', 'r',
         'F', 'R', 'u', 'r', 'f', 'R', 'U', 'R', 'u',
         'L', 'u', 'L', 'U', 'l', 'U', 'l', 'D', 'R',
         'u', 'r', 'd'
-    ];
-    
-    this.currentStep = 0;
-    this.moveCount = 0;
-    this.updateUI();
-    
-    this.uiCallbacks.setCurrentStep('Scrambling...');
-    this.uiCallbacks.setMoveSequence(scrambleSequence.join(' '));
-    
-    const moves = scrambleSequence.map(move => {
+      ];
+      
+      this.currentStep = 0;
+      this.moveCount = 0;
+      this.clearMoveLog(); // Clear previous log
+      this.updateUI();
+      
+      this.uiCallbacks.setCurrentStep('Scrambling...');
+      this.uiCallbacks.setMoveSequence(scrambleSequence.join(' '));
+      
+      const moves = scrambleSequence.map(move => {
         switch(move) {
-        case 'R': return this.R;
-        case 'r': return this.r;
-        case 'U': return this.U;
-        case 'u': return this.u;
-        case 'L': return this.L;
-        case 'l': return this.l;
-        case 'D': return this.D;
-        case 'd': return this.d;
-        case 'F': return this.F;
-        case 'f': return this.f;
-        case 'B': return this.B;
-        case 'b': return this.b;
+          case 'R': return this.R;
+          case 'r': return this.r;
+          case 'U': return this.U;
+          case 'u': return this.u;
+          case 'L': return this.L;
+          case 'l': return this.l;
+          case 'D': return this.D;
+          case 'd': return this.d;
+          case 'F': return this.F;
+          case 'f': return this.f;
+          case 'B': return this.B;
+          case 'b': return this.b;
         }
-    });
-    
-    this.runMethodAtNo(moves, 0, 0, () => {
-        this.uiCallbacks.setCurrentStep('Scrambled - Ready to Solve');
-        this.uiCallbacks.setCurrentMove('-');
-        this.updateUI();
-    });
+      });
+      
+      this.runMethodAtNo(moves, 0, 0, () => {
+          this.uiCallbacks.setCurrentStep('Scrambled - Ready to Solve');
+          this.uiCallbacks.setCurrentMove('-');
+          this.updateUI();
+      });
     }
 
     // Stop solving
     stopSolve() {
-    this.isAutoSolve = false;
-    this.currentStep = 0;
-    this.uiCallbacks.setCurrentStep('Stopped');
-    this.uiCallbacks.setCurrentMove('-');
-    this.uiCallbacks.setMoveSequence('Solving stopped');
-    this.updateUI();
+      this.isAutoSolve = false;
+      this.setStepSolveActive(false);
+      this.currentStep = 0;
+      this.uiCallbacks.setCurrentStep('Stopped');
+      this.uiCallbacks.setCurrentMove('-');
+      this.uiCallbacks.setMoveSequence('Solving stopped');
+      this.updateUI();
     }
 
     // Auto solve main method
     autoSolve() {
-    if (!this.checkStep8() && !this.isRotating) {
-        console.log('Starting auto solve');
+      if (!this.checkStep8() && !this.isRotating) {
+        console.log('Auto solve mode activated - use > button to proceed step by step');
         this.startTime = performance.now();
         this.stepCount = 0;
         this.moveCount = 0;
         this.isAutoSolve = true;
+        this.setStepSolveActive(true);
         
         // Get top and bottom colors
         const topCenter = this.getCubeByIndex(10);
         this.topColor = this.getFaceColorByVector(topCenter, this.YLine);
         this.bottomColor = this.getOppositeColor(this.topColor);
         
-        // Check which step to start from
-        if (this.checkStep7()) {
-        this.currentStep = 8;
-        console.log('Starting step 8');
-        this.step8();
-        } else if (this.checkStep6()) {
-        this.currentStep = 7;
-        console.log('Starting step 7');
-        this.step7();
-        } else if (this.checkStep5()) {
-        this.currentStep = 6;
-        console.log('Starting step 6');
-        this.step6();
-        } else if (this.checkStep4()) {
-        this.currentStep = 5;
-        console.log('Starting step 5');
-        this.step5();
-        } else if (this.checkStep3()) {
-        this.currentStep = 4;
-        this.startFaceNo = 0;
-        this.currentFaceNo = 0;
-        this.endFaceNo = 3;
-        console.log('Starting step 4');
-        this.step4();
-        } else if (this.checkStep2()) {
-        this.currentStep = 3;
-        console.log('Starting step 3');
-        this.step3();
-        } else if (this.checkStep1()) {
-        this.currentStep = 2;
-        console.log('Starting step 2');
-        this.step2();
-        } else {
-        this.currentStep = 1;
-        console.log('Starting step 1');
-        this.step1();
-        }
-    } else {
+        // Determine current step
+        this.determineCurrentStep();
+        this.updateUI();
+      } else {
         console.log('Already solved');
+      }
     }
+    determineCurrentStep() {
+      if (this.checkStep7()) {
+        this.currentStep = 8;
+        this.uiCallbacks.setCurrentStep('Step 8: Final Orient Corners');
+      } else if (this.checkStep6()) {
+        this.currentStep = 7;
+        this.uiCallbacks.setCurrentStep('Step 7: Orient Top Edges');
+      } else if (this.checkStep5()) {
+        this.currentStep = 6;
+        this.uiCallbacks.setCurrentStep('Step 6: Position Top Corners');
+      } else if (this.checkStep4()) {
+        this.currentStep = 5;
+        this.uiCallbacks.setCurrentStep('Step 5: Top Cross');
+      } else if (this.checkStep3()) {
+        this.currentStep = 4;
+        this.uiCallbacks.setCurrentStep('Step 4: Middle Layer');
+      } else if (this.checkStep2()) {
+        this.currentStep = 3;
+        this.uiCallbacks.setCurrentStep('Step 3: Bottom Corners');
+      } else if (this.checkStep1()) {
+        this.currentStep = 2;
+        this.uiCallbacks.setCurrentStep('Step 2: Bottom Edges');
+      } else {
+        this.currentStep = 1;
+        this.uiCallbacks.setCurrentStep('Step 1: White Cross');
+      }
     }
 
-    // Step 1: White Cross (小白花)
+    // Step 1: White Cross
     step1() {
-    if (this.checkStep1()) {
-        console.log('Step 1 complete, starting step 2');
+      if (this.checkStep1()) {
+        console.log('Step 1 complete');
         this.currentStep = 2;
-        this.step2();
-        return;
-    }
-    
-    this.uiCallbacks.setCurrentStep('Step 1: White Cross');
-    this.uiCallbacks.setCurrentMove('Finding white edges...');
-    
-    this.step1Case1(0);
-    this.step1Case1(1);
-    this.step1Case1(2);
-    this.step1Case1(3);
-    
-    this.step1Case2(0);
-    this.step1Case2(1);
-    this.step1Case2(2);
-    this.step1Case2(3);
-    
-    this.step1Case3(0);
-    this.step1Case3(1);
-    this.step1Case3(2);
-    this.step1Case3(3);
-    
-    this.step1Case4(0);
-    this.step1Case4(1);
-    this.step1Case4(2);
-    this.step1Case4(3);
-    
-    if (!this.isRotating) {
+        this.uiCallbacks.setCurrentStep('Step 2: Bottom Edges');
         this.isAutoSolve = false;
+        this.setStepSolveActive(false);
+        return;
+      }
+      
+      this.uiCallbacks.setCurrentStep('Step 1: White Cross');
+      this.uiCallbacks.setCurrentMove('Finding white edges...');
+      
+      this.step1Case1(0);
+      this.step1Case1(1);
+      this.step1Case1(2);
+      this.step1Case1(3);
+      
+      this.step1Case2(0);
+      this.step1Case2(1);
+      this.step1Case2(2);
+      this.step1Case2(3);
+      
+      this.step1Case3(0);
+      this.step1Case3(1);
+      this.step1Case3(2);
+      this.step1Case3(3);
+      
+      this.step1Case4(0);
+      this.step1Case4(1);
+      this.step1Case4(2);
+      this.step1Case4(3);
+      
+      if (!this.isRotating) {
+        this.isAutoSolve = false;
+        this.setStepSolveActive(false);
         console.log('Something wrong in step 1');
         this.showError('Error in Step 1');
-    }
+      }
     }
 
     checkStep1() {
@@ -1461,37 +1381,40 @@ updateCubeIndex(elements) {
     }
     }
 
-    // Step 2: Bottom Edges (底棱归位)
+    // Step 2: Bottom Edges 
     step2() {
-    if (this.checkStep2()) {
-        console.log('Step 2 complete, starting step 3');
+      if (this.checkStep2()) {
+        console.log('Step 2 complete');
         this.currentStep = 3;
-        this.step3();
-        return;
-    }
-    
-    this.uiCallbacks.setCurrentStep('Step 2: Bottom Edges');
-    
-    this.step2Case1(0);
-    this.step2Case1(1);
-    this.step2Case1(2);
-    this.step2Case1(3);
-    
-    this.step2Case2(0);
-    this.step2Case2(1);
-    this.step2Case2(2);
-    this.step2Case2(3);
-    
-    this.step2Case3(0);
-    this.step2Case3(1);
-    this.step2Case3(2);
-    this.step2Case3(3);
-    
-    if (!this.isRotating) {
+        this.uiCallbacks.setCurrentStep('Step 3: Bottom Corners');
         this.isAutoSolve = false;
+        this.setStepSolveActive(false);
+        return;
+      }
+      
+      this.uiCallbacks.setCurrentStep('Step 2: Bottom Edges');
+      
+      this.step2Case1(0);
+      this.step2Case1(1);
+      this.step2Case1(2);
+      this.step2Case1(3);
+      
+      this.step2Case2(0);
+      this.step2Case2(1);
+      this.step2Case2(2);
+      this.step2Case2(3);
+      
+      this.step2Case3(0);
+      this.step2Case3(1);
+      this.step2Case3(2);
+      this.step2Case3(3);
+      
+      if (!this.isRotating) {
+        this.isAutoSolve = false;
+        this.setStepSolveActive(false);
         console.log('Something wrong in step 2');
         this.showError('Error in Step 2');
-    }
+      }
     }
 
     checkStep2() {
@@ -1613,31 +1536,34 @@ updateCubeIndex(elements) {
 
     // Step 3: Bottom Corners
     step3() {
-    if (this.checkStep3()) {
-        console.log('Step 3 complete, starting step 4');
+      if (this.checkStep3()) {
+        console.log('Step 3 complete');
         this.currentStep = 4;
         this.startFaceNo = 0;
         this.endFaceNo = 3;
-        this.step4();
+        this.uiCallbacks.setCurrentStep('Step 4: Middle Layer');
+        this.isAutoSolve = false;
+        this.setStepSolveActive(false);
         return;
-    }
-    
-    this.uiCallbacks.setCurrentStep('Step 3: Bottom Corners');
-    
-    // Try all cases for all rotations
-    for (let i = 0; i < 4; i++) {
+      }
+      
+      this.uiCallbacks.setCurrentStep('Step 3: Bottom Corners');
+      
+      // Try all cases for all rotations
+      for (let i = 0; i < 4; i++) {
         this.step3Case1(i);
         this.step3Case2(i);
         this.step3Case3(i);
         this.step3Case4(i);
         this.step3Case5(i);
-    }
-    
-    if (!this.isRotating) {
+      }
+      
+      if (!this.isRotating) {
         this.isAutoSolve = false;
+        this.setStepSolveActive(false);
         console.log('Something wrong in step 3');
         this.showError('Error in Step 3');
-    }
+      }
     }
 
     checkStep3() {
@@ -1888,23 +1814,26 @@ updateCubeIndex(elements) {
     }
     }
 
-    // Step 4: Middle Layer (中棱归位)
+    // Step 4: Middle Layer
     step4() {
-    if (this.checkStep4()) {
-        console.log('Step 4 complete, starting step 5');
+      if (this.checkStep4()) {
+        console.log('Step 4 complete');
         this.currentStep = 5;
-        this.step5();
-        return;
-    }
-    
-    this.uiCallbacks.setCurrentStep('Step 4: Middle Layer');
-    this.step4Face(this.currentFaceNo);
-    
-    if (!this.isRotating) {
+        this.uiCallbacks.setCurrentStep('Step 5: Top Cross');
         this.isAutoSolve = false;
+        this.setStepSolveActive(false);
+        return;
+      }
+      
+      this.uiCallbacks.setCurrentStep('Step 4: Middle Layer');
+      this.step4Face(this.currentFaceNo);
+      
+      if (!this.isRotating) {
+        this.isAutoSolve = false;
+        this.setStepSolveActive(false);
         console.log('Something wrong in step 4');
         this.showError('Error in Step 4');
-    }
+      }
     }
 
     checkStep4() {
@@ -2133,28 +2062,31 @@ updateCubeIndex(elements) {
     }
     }
 
-    // Step 5: Top Cross (顶棱面位)
+    // Step 5: Top Cross
     step5() {
-    if (this.checkStep5()) {
-        console.log('Step 5 complete, starting step 6');
+      if (this.checkStep5()) {
+        console.log('Step 5 complete');
         this.currentStep = 6;
-        this.step6();
+        this.uiCallbacks.setCurrentStep('Step 6: Position Top Corners');
+        this.isAutoSolve = false;
+        this.setStepSolveActive(false);
         return;
-    }
-    
-    this.uiCallbacks.setCurrentStep('Step 5: Top Cross');
-    
-    for (let i = 0; i < 4; i++) {
+      }
+      
+      this.uiCallbacks.setCurrentStep('Step 5: Top Cross');
+      
+      for (let i = 0; i < 4; i++) {
         this.step5Case1(i);
         this.step5Case2(i);
         this.step5Case3(i);
-    }
-    
-    if (!this.isRotating) {
+      }
+      
+      if (!this.isRotating) {
         this.isAutoSolve = false;
+        this.setStepSolveActive(false);
         console.log('Something wrong in step 5');
         this.showError('Error in Step 5');
-    }
+      }
     }
 
     checkStep5() {
@@ -2248,25 +2180,29 @@ updateCubeIndex(elements) {
     }
     }
 
-    // Step 6: Position Top Corners (顶角面位)
+    // Step 6: Position Top Corners
     step6() {
-    if (this.checkStep6()) {
-        console.log('Step 6 complete, starting step 7');
+      if (this.checkStep6()) {
+        console.log('Step 6 complete');
         this.currentStep = 7;
-        this.step7();
-        return;
-    }
-    this.uiCallbacks.setCurrentStep('Step 6: Position Top Corners');
-    
-    for (let i = 0; i < 4; i++) {
-        this.step6Case1(i);
-    }
-    
-    if (!this.isRotating) {
+        this.uiCallbacks.setCurrentStep('Step 7: Orient Top Edges');
         this.isAutoSolve = false;
+        this.setStepSolveActive(false);
+        return;
+      }
+      
+      this.uiCallbacks.setCurrentStep('Step 6: Position Top Corners');
+      
+      for (let i = 0; i < 4; i++) {
+        this.step6Case1(i);
+      }
+      
+      if (!this.isRotating) {
+        this.isAutoSolve = false;
+        this.setStepSolveActive(false);
         console.log('Something wrong in step 6');
         this.showError('Error in Step 6');
-    }
+      }
     }
 
     checkStep6() {
@@ -2327,29 +2263,32 @@ updateCubeIndex(elements) {
     }
     }
 
-// Step 7: Orient Top Edges (顶棱归位)
+    // Step 7: Orient Top Edges
     step7() {
-    if (this.checkStep7()) {
-        console.log('Step 7 complete, starting step 8');
+      if (this.checkStep7()) {
+        console.log('Step 7 complete');
         this.currentStep = 8;
-        this.step8();
+        this.uiCallbacks.setCurrentStep('Step 8: Final Orient Corners');
+        this.isAutoSolve = false;
+        this.setStepSolveActive(false);
         return;
-    }
-    
-    this.uiCallbacks.setCurrentStep('Step 7: Orient Top Edges');
-    
-    for (let i = 0; i < 4; i++) {
+      }
+      
+      this.uiCallbacks.setCurrentStep('Step 7: Orient Top Edges');
+      
+      for (let i = 0; i < 4; i++) {
         this.step7Case1(i);
         this.step7Case2(i);
-    }
-    
-    this.step7Case3();
-    
-    if (!this.isRotating) {
+      }
+      
+      this.step7Case3();
+      
+      if (!this.isRotating) {
         this.isAutoSolve = false;
+        this.setStepSolveActive(false);
         console.log('Something wrong in step 7');
         this.showError('Error in Step 7');
-    }
+      }
     }
 
     checkStep7() {
@@ -2462,10 +2401,11 @@ updateCubeIndex(elements) {
     }
     }
 
-    // Step 8: Final Orient Corners (顶角归位)
+    // Step 8: Final Orient Corners
     step8() {
-    if (this.checkStep8()) {
+      if (this.checkStep8()) {
         this.isAutoSolve = false;
+        this.setStepSolveActive(false);
         this.endTime = performance.now();
         console.log('Cube solved!');
         console.log('Total time: ' + (this.endTime - this.startTime) + 'ms');
@@ -2474,22 +2414,23 @@ updateCubeIndex(elements) {
         this.uiCallbacks.setCurrentMove('Complete');
         this.uiCallbacks.setMoveSequence(`Solved in ${this.moveCount} moves`);
         return;
-    }
-    
-    this.uiCallbacks.setCurrentStep('Step 8: Final Orient Corners');
-    
-    for (let i = 0; i < 4; i++) {
+      }
+      
+      this.uiCallbacks.setCurrentStep('Step 8: Final Orient Corners');
+      
+      for (let i = 0; i < 4; i++) {
         this.step8Case1(i);
         this.step8Case2(i);
-    }
-    
-    this.step8Case3();
-    
-    if (!this.isRotating) {
+      }
+      
+      this.step8Case3();
+      
+      if (!this.isRotating) {
         this.isAutoSolve = false;
+        this.setStepSolveActive(false);
         console.log('Something wrong in step 8');
         this.showError('Error in Step 8');
-    }
+      }
     }
 
     checkStep8() {
