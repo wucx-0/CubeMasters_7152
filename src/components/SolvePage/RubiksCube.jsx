@@ -128,6 +128,8 @@ const RubiksCube = () => {
       <div className="cube-controls">
         <div className="control-buttons">
           <button onClick={handleRandomRotate}>Shuffle</button>
+          <button onClick={handleAutoSolve}>Auto Solve</button>
+          <button onClick={handleStepSolve}>Step Solve</button>
           <button onClick={handleStop}>Stop</button>
           <button onClick={handleReset}>Reset</button>
         </div>
@@ -192,6 +194,7 @@ class RubiksCubeClass {
     this.currentStep = 1;
     this.minCubeIndex = 101;
     this.setStepSolveActive = uiCallbacks.setStepSolveActive || (() => {});
+    this.solveMode = 'step';
     
     // Algorithm specific properties
     this.bottomColor = null;
@@ -834,7 +837,12 @@ class RubiksCubeClass {
       
       if (next) {
         next();
-      } else if (this.isAutoSolve) {
+    } else if (this.isAutoSolve) {
+      if (this.solveMode === 'auto') {
+        // Continue automatically
+        this.executeCurrentStep();
+      } else {
+        // Step mode - stop and wait for user
         switch(this.currentStep) {
           case 1: this.step1(); break;
           case 2: this.step2(); break;
@@ -848,8 +856,8 @@ class RubiksCubeClass {
         }
       }
     }
+    }
   }
-
     // Update cube positions after rotation
 updateCubeIndex(elements) {
     elements.forEach(element => {
@@ -1123,7 +1131,23 @@ updateCubeIndex(elements) {
       this.currentStepMoves = [];
       this.updateMoveLog();
     }
-
+    stepSolveMode() {
+      if (this.isRotating) return;
+      
+      this.solveMode = 'step';
+      this.isAutoSolve = true;
+      this.setStepSolveActive(true);
+      
+      // Get top and bottom colors if not set
+      if (!this.topColor) {
+        const topCenter = this.getCubeByIndex(10);
+        this.topColor = this.getFaceColorByVector(topCenter, this.YLine);
+        this.bottomColor = this.getOppositeColor(this.topColor);
+      }
+      
+      this.determineCurrentStep();
+      this.updateUI();
+    }
     // Random shuffle
     randomRotate() {
     if (!this.isRotating && !this.isAutoSolve) {
@@ -1256,12 +1280,20 @@ updateCubeIndex(elements) {
     // Step 1: White Cross
     step1() {
       if (this.checkStep1()) {
-        console.log('Step 1 complete');
-        this.currentStep = 2;
-        this.uiCallbacks.setCurrentStep('Step 2: Bottom Edges');
-        this.isAutoSolve = false;
-        this.setStepSolveActive(false);
-        return;
+        if (this.solveMode === 'auto') {
+          console.log('Step 1 complete, starting step 2');
+          this.currentStep = 2;
+          this.uiCallbacks.setCurrentStep('Step 2: Bottom Edges');
+          this.step2(); // Continue automatically
+          return;
+        } else {
+          console.log('Step 1 complete');
+          this.currentStep = 2;
+          this.uiCallbacks.setCurrentStep('Step 2: Bottom Edges');
+          this.isAutoSolve = false;
+          this.setStepSolveActive(false);
+          return;
+        }
       }
       
       this.uiCallbacks.setCurrentStep('Step 1: White Cross');
@@ -1379,12 +1411,20 @@ updateCubeIndex(elements) {
     // Step 2: Bottom Edges 
     step2() {
       if (this.checkStep2()) {
-        console.log('Step 2 complete');
-        this.currentStep = 3;
-        this.uiCallbacks.setCurrentStep('Step 3: Bottom Corners');
-        this.isAutoSolve = false;
-        this.setStepSolveActive(false);
-        return;
+        if (this.solveMode === 'auto') {
+          console.log('Step 2 complete, starting step 3');
+          this.currentStep = 3;
+          this.uiCallbacks.setCurrentStep('Step 3: Bottom Edges');
+          this.step3(); // Continue automatically
+          return;
+        } else {
+          console.log('Step 2 complete');
+          this.currentStep = 3;
+          this.uiCallbacks.setCurrentStep('Step 3: Bottom Edges');
+          this.isAutoSolve = false;
+          this.setStepSolveActive(false);
+          return;
+        }
       }
       
       this.uiCallbacks.setCurrentStep('Step 2: Bottom Edges');
@@ -1532,14 +1572,20 @@ updateCubeIndex(elements) {
     // Step 3: Bottom Corners
     step3() {
       if (this.checkStep3()) {
+      if (this.solveMode === 'auto') {
+        console.log('Step 3 complete, starting step 4');
+        this.currentStep = 4;
+        this.uiCallbacks.setCurrentStep('Step 4: Middle Layer');
+        this.step4(); // Continue automatically
+        return;
+      } else {
         console.log('Step 3 complete');
         this.currentStep = 4;
-        this.startFaceNo = 0;
-        this.endFaceNo = 3;
         this.uiCallbacks.setCurrentStep('Step 4: Middle Layer');
         this.isAutoSolve = false;
         this.setStepSolveActive(false);
         return;
+      }
       }
       
       this.uiCallbacks.setCurrentStep('Step 3: Bottom Corners');
@@ -1812,12 +1858,20 @@ updateCubeIndex(elements) {
     // Step 4: Middle Layer
     step4() {
       if (this.checkStep4()) {
-        console.log('Step 4 complete');
-        this.currentStep = 5;
-        this.uiCallbacks.setCurrentStep('Step 5: Top Cross');
-        this.isAutoSolve = false;
-        this.setStepSolveActive(false);
-        return;
+        if (this.solveMode === 'auto') {
+          console.log('Step 4 complete, starting step 5');
+          this.currentStep = 5;
+          this.uiCallbacks.setCurrentStep('Step 5: Top Cross');
+          this.step5(); // Continue automatically
+          return;
+        } else {
+          console.log('Step 4 complete');
+          this.currentStep = 5;
+          this.uiCallbacks.setCurrentStep('Step 5: Top Cross');
+          this.isAutoSolve = false;
+          this.setStepSolveActive(false);
+          return;
+        }
       }
       
       this.uiCallbacks.setCurrentStep('Step 4: Middle Layer');
@@ -2060,12 +2114,20 @@ updateCubeIndex(elements) {
     // Step 5: Top Cross
     step5() {
       if (this.checkStep5()) {
-        console.log('Step 5 complete');
-        this.currentStep = 6;
-        this.uiCallbacks.setCurrentStep('Step 6: Position Top Corners');
-        this.isAutoSolve = false;
-        this.setStepSolveActive(false);
-        return;
+        if (this.solveMode === 'auto') {
+          console.log('Step 5 complete, starting step 6');
+          this.currentStep = 6;
+          this.uiCallbacks.setCurrentStep('Step 6: Position Top Corners');
+          this.step6(); // Continue automatically
+          return;
+        } else {
+          console.log('Step 5 complete');
+          this.currentStep = 6;
+          this.uiCallbacks.setCurrentStep('Step 6: Position Top Corners');
+          this.isAutoSolve = false;
+          this.setStepSolveActive(false);
+          return;
+        }
       }
       
       this.uiCallbacks.setCurrentStep('Step 5: Top Cross');
@@ -2178,12 +2240,20 @@ updateCubeIndex(elements) {
     // Step 6: Position Top Corners
     step6() {
       if (this.checkStep6()) {
-        console.log('Step 6 complete');
-        this.currentStep = 7;
-        this.uiCallbacks.setCurrentStep('Step 7: Orient Top Edges');
-        this.isAutoSolve = false;
-        this.setStepSolveActive(false);
-        return;
+        if (this.solveMode === 'auto') {
+          console.log('Step 6 complete, starting step 7');
+          this.currentStep = 7;
+          this.uiCallbacks.setCurrentStep('Step 7: Orient Top Edges');
+          this.step7(); // Continue automatically
+          return;
+        } else {
+          console.log('Step 6 complete');
+          this.currentStep = 7;
+          this.uiCallbacks.setCurrentStep('Step 7: Orient Top Edges');
+          this.isAutoSolve = false;
+          this.setStepSolveActive(false);
+          return;
+        }
       }
       
       this.uiCallbacks.setCurrentStep('Step 6: Position Top Corners');
@@ -2261,12 +2331,20 @@ updateCubeIndex(elements) {
     // Step 7: Orient Top Edges
     step7() {
       if (this.checkStep7()) {
-        console.log('Step 7 complete');
-        this.currentStep = 8;
-        this.uiCallbacks.setCurrentStep('Step 8: Final Orient Corners');
-        this.isAutoSolve = false;
-        this.setStepSolveActive(false);
-        return;
+        if (this.solveMode === 'auto') {
+          console.log('Step 7 complete, starting step 8');
+          this.currentStep = 8;
+          this.uiCallbacks.setCurrentStep('Step 8: Final Orient Corners');
+          this.step8(); // Continue automatically
+          return;
+        } else {
+          console.log('Step 7 complete');
+          this.currentStep = 8;
+          this.uiCallbacks.setCurrentStep('Step 8: Final Orient Corners');
+          this.isAutoSolve = false;
+          this.setStepSolveActive(false);
+          return;
+        }
       }
       
       this.uiCallbacks.setCurrentStep('Step 7: Orient Top Edges');
@@ -2399,6 +2477,7 @@ updateCubeIndex(elements) {
     // Step 8: Final Orient Corners
     step8() {
       if (this.checkStep8()) {
+        // Both modes end the same way since solving is complete
         this.isAutoSolve = false;
         this.setStepSolveActive(false);
         this.endTime = performance.now();
