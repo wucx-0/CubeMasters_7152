@@ -1,10 +1,15 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Formik, Form, Field } from "formik";
 import * as Yup from "yup";
-import { Button, TextField, MenuItem, CircularProgress } from "@mui/material";
-import { Divider } from '@mui/material';
+import {
+  Button,
+  TextField,
+  MenuItem,
+  CircularProgress,
+  Divider,
+} from "@mui/material";
 import { getAuth } from "firebase/auth";
-import { doc, setDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 import { db } from "../../firebase";
 
 import CustomButton from "../../components/CustomButton.jsx";
@@ -15,67 +20,45 @@ const PersonalisationSchema = Yup.object().shape({
   name: Yup.string().required("Please enter your name"),
   username: Yup.string()
     .required("Please choose a username")
-    .min(3, "Username must be at least 3 characters")
+    .min(3)
     .matches(
       /^[a-zA-Z0-9_]+$/,
       "Only letters, numbers and underscores allowed",
     ),
   country: Yup.string().required("Please select your country"),
-  description: Yup.string().max(
-    200,
-    "Description must be 200 characters or less",
-  ),
+  description: Yup.string().max(200),
+  experienceLevel: Yup.string(),
+  mainEvent: Yup.string(),
+  goals: Yup.string().max(100),
+  favoriteMethods: Yup.string().max(100),
 });
+
+const experienceLevels = ["Beginner", "Intermediate", "Advanced", "Pro"];
+
+const mainEvents = [
+  "3x3",
+  "2x2",
+  "OH",
+  "BLD",
+  "4x4",
+  "5x5",
+  "Mega",
+  "Pyraminx",
+];
+
+const methods = ["CFOP", "Roux", "ZZ", "Petrus", "Other"];
 
 const countries = [
   { value: "us", label: "United States" },
+  { value: "sg", label: "Singapore" },
   { value: "ca", label: "Canada" },
   { value: "uk", label: "United Kingdom" },
   { value: "au", label: "Australia" },
   { value: "de", label: "Germany" },
-  { value: "fr", label: "France" },
-  { value: "it", label: "Italy" },
-  { value: "es", label: "Spain" },
   { value: "jp", label: "Japan" },
   { value: "cn", label: "China" },
   { value: "in", label: "India" },
   { value: "br", label: "Brazil" },
-  { value: "mx", label: "Mexico" },
-  { value: "ru", label: "Russia" },
-  { value: "za", label: "South Africa" },
-  { value: "ng", label: "Nigeria" },
-  { value: "eg", label: "Egypt" },
-  { value: "sa", label: "Saudi Arabia" },
-  { value: "ae", label: "United Arab Emirates" },
-  { value: "kr", label: "South Korea" },
-  { value: "sg", label: "Singapore" },
-  { value: "nz", label: "New Zealand" },
-  { value: "se", label: "Sweden" },
-  { value: "no", label: "Norway" },
-  { value: "fi", label: "Finland" },
-  { value: "dk", label: "Denmark" },
-  { value: "nl", label: "Netherlands" },
-  { value: "be", label: "Belgium" },
-  { value: "ch", label: "Switzerland" },
-  { value: "at", label: "Austria" },
-  { value: "pt", label: "Portugal" },
-  { value: "gr", label: "Greece" },
-  { value: "tr", label: "Turkey" },
-  { value: "pl", label: "Poland" },
-  { value: "ie", label: "Ireland" },
-  { value: "ar", label: "Argentina" },
-  { value: "cl", label: "Chile" },
-  { value: "co", label: "Colombia" },
-  { value: "pe", label: "Peru" },
-  { value: "ve", label: "Venezuela" },
-  { value: "id", label: "Indonesia" },
-  { value: "my", label: "Malaysia" },
-  { value: "th", label: "Thailand" },
-  { value: "vn", label: "Vietnam" },
-  { value: "ph", label: "Philippines" },
-  { value: "pk", label: "Pakistan" },
-  { value: "bd", label: "Bangladesh" },
-  { value: "lk", label: "Sri Lanka" },
   // Add more as needed
 ];
 
@@ -83,39 +66,60 @@ export default function PersonalisationForm() {
   const auth = getAuth();
   const user = auth.currentUser;
 
-  const initialValues = {
-    name: localStorage.getItem("name") || "",
-    username: localStorage.getItem("username") || "",
-    country: localStorage.getItem("country") || "us",
-    description: localStorage.getItem("description") || "",
-  };
+  const [initialValues, setInitialValues] = useState({
+    name: "",
+    username: "",
+    country: "us",
+    description: "",
+    experienceLevel: "",
+    mainEvent: "",
+    goals: "",
+    favoriteMethods: "",
+  });
+
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchData = async () => {
+      if (!user) return;
+
+      try {
+        const docRef = doc(db, "users", user.uid);
+        const docSnap = await getDoc(docRef);
+
+        if (docSnap.exists()) {
+          const data = docSnap.data()?.personalisation || {};
+          setInitialValues((prev) => ({
+            ...prev,
+            ...data,
+          }));
+        }
+      } catch (error) {
+        console.error("Error fetching personalisation data:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchData();
+  }, [user]);
 
   const handleSubmit = async (values, { setSubmitting }) => {
     try {
-      if (!user) {
-        throw new Error("User not authenticated");
-      }
+      if (!user) throw new Error("User not authenticated");
 
-      // Save to Firestore
       await setDoc(
         doc(db, "users", user.uid),
         {
-          personalisation: {
-            name: values.name,
-            username: values.username,
-            country: values.country,
-            description: values.description,
-            lastUpdated: new Date().toISOString(),
-          },
+          personalisation: { ...values },
         },
         { merge: true },
       );
 
-      // Also save to localStorage for immediate access
-      localStorage.setItem("name", values.name);
-      localStorage.setItem("username", values.username);
-      localStorage.setItem("country", values.country);
-      localStorage.setItem("description", values.description);
+      // Optionally cache in localStorage
+      Object.keys(values).forEach((key) => {
+        localStorage.setItem(key, values[key]);
+      });
 
       alert("Profile updated successfully!");
     } catch (error) {
@@ -126,9 +130,18 @@ export default function PersonalisationForm() {
     }
   };
 
+  if (loading) {
+    return (
+      <div style={{ padding: 30, textAlign: "center" }}>
+        <CircularProgress />
+      </div>
+    );
+  }
+
   return (
     <div className="personalisation-form settings-container">
       <Formik
+        enableReinitialize
         initialValues={initialValues}
         validationSchema={PersonalisationSchema}
         onSubmit={handleSubmit}
@@ -170,37 +183,12 @@ export default function PersonalisationForm() {
                   name="country"
                   select
                   fullWidth
-                  SelectProps={{
-                    MenuProps: {
-                      anchorOrigin: {
-                        vertical: "bottom",
-                        horizontal: "left",
-                      },
-                      transformOrigin: {
-                        vertical: "top",
-                        horizontal: "left",
-                      },
-                      PaperProps: {
-                        style: {
-                          maxHeight: 200, // Shows about 5 items (adjust based on your item height)
-                          marginTop: 8, // Space between field and dropdown
-                        },
-                      },
-                    },
-                  }}
                   variant="outlined"
                   error={touched.country && !!errors.country}
                   helperText={touched.country && errors.country}
                 >
                   {countries.map((option) => (
-                    <MenuItem
-                      key={option.value}
-                      value={option.value}
-                      style={{
-                        height: 40, // Consistent item height
-                        padding: "8px 16px",
-                      }}
-                    >
+                    <MenuItem key={option.value} value={option.value}>
                       {option.label}
                     </MenuItem>
                   ))}
@@ -215,33 +203,70 @@ export default function PersonalisationForm() {
                   as={TextField}
                   name="description"
                   multiline
-                  rows={3}
+                  rows={2}
                   fullWidth
                 />
               </div>
             </div>
 
-            <div style={{ height: 48 }} />
+            <div style={{ height: 24 }} />
 
-            {/*edit as needed*/}
-            {/*<div className="form-row">
-              <label className="form-label">Next Setting:</label>
-              <div className="form-field description-field">
+            <div className="form-row">
+              <label className="form-label">Experience Level:</label>
+              <div className="form-field">
+                <Field as={TextField} name="experienceLevel" select fullWidth>
+                  {experienceLevels.map((level) => (
+                    <MenuItem key={level} value={level}>
+                      {level}
+                    </MenuItem>
+                  ))}
+                </Field>
+              </div>
+            </div>
+
+            <div className="form-row">
+              <label className="form-label">Main Event:</label>
+              <div className="form-field">
+                <Field as={TextField} name="mainEvent" select fullWidth>
+                  {mainEvents.map((event) => (
+                    <MenuItem key={event} value={event}>
+                      {event}
+                    </MenuItem>
+                  ))}
+                </Field>
+              </div>
+            </div>
+
+            <div className="form-row">
+              <label className="form-label">Your Goals:</label>
+              <div className="form-field">
                 <Field
-                    as={TextField}
-                    name="nextsettingdescription"
-                    multiline
-                    rows={3}
-                    fullWidth
+                  as={TextField}
+                  name="goals"
+                  fullWidth
+                  placeholder="Sub-20, Learn OH, Blindfolded..."
                 />
               </div>
-            </div>*/}
+            </div>
+
+            <div className="form-row">
+              <label className="form-label">Favorite Methods:</label>
+              <div className="form-field">
+                <Field as={TextField} name="favoriteMethods" select fullWidth>
+                  {methods.map((method) => (
+                    <MenuItem key={method} value={method}>
+                      {method}
+                    </MenuItem>
+                  ))}
+                </Field>
+              </div>
+            </div>
 
             <div
               style={{
                 display: "flex",
                 justifyContent: "center",
-                marginTop: "20px",
+                marginTop: 20,
               }}
             >
               <CustomButton

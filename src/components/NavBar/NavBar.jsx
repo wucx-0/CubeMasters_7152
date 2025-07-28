@@ -8,7 +8,8 @@ import { Button, Box, Typography } from "@mui/material";
 import { getDoc, doc } from "firebase/firestore";
 
 function Navbar() {
-  const [username, setUsername] = useState("");
+  const [username, setUsername] = useState(null);
+  const [authChecked, setAuthChecked] = useState(false);
 
   async function handleLogout() {
     try {
@@ -24,7 +25,7 @@ function Navbar() {
         console.log("Checking for username...");
 
         // Check localStorage first
-        const localUsername = localStorage.getItem("username");
+        const localUsername = localStorage.getItem(`username_${user.uid}`);
         console.log("LocalStorage username:", localUsername);
         if (localUsername) setUsername(localUsername);
 
@@ -42,16 +43,23 @@ function Navbar() {
 
             if (firestoreUsername) {
               setUsername(firestoreUsername);
-              localStorage.setItem("username", firestoreUsername);
+              localStorage.setItem(`username_${user.uid}`, firestoreUsername);
               console.log("Set username to:", firestoreUsername);
+            } else {
+              setUsername("");
             }
+          } else {
+            setUsername("");
           }
         } catch (error) {
           console.error("Error fetching user data:", error);
+          setUsername("");
         }
       } else {
-        setUsername("");
+        setUsername(null);
       }
+
+      setAuthChecked(true);
     });
 
     return () => unsubscribe();
@@ -77,12 +85,12 @@ function Navbar() {
       <Link to="/timer" className="item Timer">
         Timer
       </Link>
-      <Link to="/friends" className="item Friends">
+      {/*<Link to="/friends" className="item Friends">
         Friends
       </Link>
       <Link to="/leaderboard" className="item Leaderboard">
         Leaderboard
-      </Link>
+      </Link>*/}
       <Link to="/settings" className="item Settings">
         Settings
       </Link>
@@ -95,19 +103,31 @@ function Navbar() {
         Logout
       </Button>
 
-      {username && (
-        <Box
-          className="item welcome-message"
+      <Box
+        className="item welcome-message"
+        sx={{
+          width: "190px",
+          height: "100px",
+          margin: "0 auto",
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <Typography
+          variant="subtitle1"
           sx={{
-            width: "190px",
-            height: "100px",
-            margin: "0 auto", // Centers the box
-
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
+            fontWeight: 700,
+            color: "rgba(0, 0, 0, 0.5)",
+            textAlign: "center",
+            fontFamily: "Lexend, sans-serif",
           }}
         >
+          Welcome back,
+          <br />
+        </Typography>
+        {authChecked && username !== null && (
           <Typography
             variant="subtitle1"
             sx={{
@@ -117,12 +137,10 @@ function Navbar() {
               fontFamily: "Lexend, sans-serif",
             }}
           >
-            Welcome back,
-            <br />
-            {username}!
+            {username && username.trim() !== "" ? username : "Cuber"}!
           </Typography>
-        </Box>
-      )}
+        )}
+      </Box>
     </div>
   );
 }
