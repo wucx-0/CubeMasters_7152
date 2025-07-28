@@ -1,118 +1,459 @@
 .rubiks-cube-container {
   position: relative;
-  width: 75vw;  /* Increased from 60vw */
-  height: 75vh; /* Increased from 60vh */
-  min-width: 600px; /* Increased from 500px */
-  min-height: 600px; /* Increased from 500px */
-  max-width: 900px; /* Increased from 800px */
-  max-height: 900px; /* Increased from 800px */
+  width: 90vw;
+  height: 90vh;
+  min-width: 800px;
+  min-height: 700px;
+  max-width: 1400px;
+  max-height: 1000px;
   margin: 0 auto;
+  display: flex;
+  gap: 25px;
+}
+
+.cube-section {
+  flex: 0 0 60%;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
 }
 
 .cube-canvas {
   width: 100%;
-  height: 100%;
+  height: 65%;
+  min-height: 400px;
   border: 2px solid #333;
   border-radius: 8px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
 }
 
 .cube-controls {
-  position: absolute;
-  top: 20px;
-  right: 20px;
-  background: rgba(0, 0, 0, 0.8);
-  border-radius: 10px;
-  padding: 15px;
+  position: relative;
+  top: 0;
+  right: 0;
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.9), rgba(30, 30, 30, 0.9));
+  border-radius: 12px;
+  padding: 20px;
   color: white;
-  min-width: 280px;
-  max-width: 350px;
-  backdrop-filter: blur(10px);
+  width: 100%;
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
 }
 
 .control-buttons {
   display: flex;
   flex-wrap: wrap;
-  gap: 8px;
-  margin-bottom: 15px;
+  gap: 12px;
+  margin-bottom: 20px;
+  justify-content: center;
 }
 
 .control-buttons button {
-  padding: 8px 12px;
-  background: #4CAF50;
+  padding: 12px 20px;
+  background: linear-gradient(135deg, #4CAF50, #45a049);
   color: white;
   border: none;
-  border-radius: 5px;
+  border-radius: 8px;
   cursor: pointer;
-  font-size: 12px;
-  transition: background-color 0.2s;
+  font-size: 14px;
+  font-weight: 500;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(76, 175, 80, 0.3);
+  flex: 1;
+  min-width: 100px;
 }
 
-.control-buttons button:hover {
-  background: #45a049;
+.control-buttons button:hover:not(:disabled) {
+  background: linear-gradient(135deg, #45a049, #3d8b40);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(76, 175, 80, 0.4);
 }
 
 .control-buttons button:disabled {
-  background: #666;
+  background: linear-gradient(135deg, #666, #555);
   cursor: not-allowed;
   opacity: 0.5;
+  transform: none;
+  box-shadow: none;
 }
 
 /* Step control buttons styling */
 .step-control-buttons {
   display: flex;
-  gap: 8px;
-  margin-bottom: 15px;
+  gap: 15px;
+  margin-bottom: 20px;
   justify-content: center;
 }
 
 .step-control-buttons button {
-  padding: 10px 15px;
-  background: #2196F3;
+  padding: 12px 24px;
+  background: linear-gradient(135deg, #2196F3, #1976D2);
   color: white;
   border: none;
-  border-radius: 5px;
+  border-radius: 8px;
   cursor: pointer;
-  font-size: 14px;
+  font-size: 16px;
   font-weight: bold;
-  transition: background-color 0.2s;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(33, 150, 243, 0.3);
+  min-width: 80px;
 }
 
 .step-control-buttons button:hover:not(:disabled) {
-  background: #1976D2;
+  background: linear-gradient(135deg, #1976D2, #1565C0);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(33, 150, 243, 0.4);
 }
 
 .step-control-buttons button:disabled {
-  background: #666;
+  background: linear-gradient(135deg, #666, #555);
   cursor: not-allowed;
   opacity: 0.5;
+  transform: none;
+  box-shadow: none;
 }
 
 .cube-info {
   font-size: 14px;
+  margin-bottom: 20px;
 }
 
 .info-row {
   display: flex;
   justify-content: space-between;
-  margin-bottom: 8px;
+  margin-bottom: 10px;
+  padding: 8px 12px;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 6px;
+  border-left: 3px solid #4CAF50;
 }
 
 .current-move {
   font-weight: bold;
   color: #4CAF50;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
+  padding: 10px 12px;
+  background: rgba(76, 175, 80, 0.1);
+  border-radius: 6px;
+  border-left: 3px solid #4CAF50;
 }
 
 .error-message {
   color: #ff4444;
   font-size: 12px;
+  padding: 8px 12px;
+  background: rgba(255, 68, 68, 0.1);
+  border-radius: 6px;
+  border-left: 3px solid #ff4444;
+  margin-top: 10px;
 }
 
 .move-log {
   font-size: 12px;
   color: #ccc;
-  margin: 8px 0;
+  margin: 12px 0;
   word-wrap: break-word;
-  max-height: 60px;
+  max-height: 80px;
   overflow-y: auto;
+  padding: 10px 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.move-log::-webkit-scrollbar {
+  width: 4px;
+}
+
+.move-log::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 2px;
+}
+
+.move-log::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 2px;
+}
+
+/* Enhanced instruction panel */
+.instruction-panel {
+  position: absolute;
+  bottom: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.95), rgba(30, 30, 30, 0.95));
+  color: white;
+  padding: 15px 25px;
+  border-radius: 12px;
+  font-size: 14px;
+  max-width: 500px;
+  text-align: center;
+  animation: slideUp 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  z-index: 1000;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+  backdrop-filter: blur(15px);
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(30px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0) scale(1);
+  }
+}
+
+.instruction-content {
+  line-height: 1.5;
+  font-weight: 500;
+}
+
+/* Instruction guide panel - Enhanced for better visibility */
+.instruction-guide {
+  flex: 0 0 35%;
+  background: linear-gradient(135deg, rgba(0, 0, 0, 0.9), rgba(30, 30, 30, 0.9));
+  border-radius: 12px;
+  padding: 25px;
+  color: white;
+  backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+  height: 100%;
+  overflow-y: auto;
+  min-width: 350px;
+}
+
+.instruction-header {
+  margin-bottom: 25px;
+  border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+  padding-bottom: 20px;
+}
+
+.instruction-header h3 {
+  margin: 0 0 12px 0;
+  font-size: 22px;
+  font-weight: 600;
+  color: #4CAF50;
+}
+
+.current-step-indicator {
+  font-size: 14px;
+  color: #ccc;
+  background: rgba(255, 255, 255, 0.05);
+  padding: 10px 15px;
+  border-radius: 8px;
+  border-left: 3px solid #2196F3;
+  line-height: 1.4;
+}
+
+.instruction-content {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.instruction-item {
+  padding: 20px;
+  border-radius: 10px;
+  border-left: 4px solid transparent;
+  transition: all 0.3s ease;
+  position: relative;
+  background: rgba(255, 255, 255, 0.02);
+}
+
+.instruction-item.active {
+  background: linear-gradient(135deg, rgba(33, 150, 243, 0.15), rgba(33, 150, 243, 0.08));
+  border-left-color: #2196F3;
+  box-shadow: 0 6px 20px rgba(33, 150, 243, 0.15);
+}
+
+.instruction-item.completed {
+  background: linear-gradient(135deg, rgba(76, 175, 80, 0.12), rgba(76, 175, 80, 0.06));
+  border-left-color: #4CAF50;
+  opacity: 0.8;
+}
+
+.instruction-item.completed::after {
+  content: "✓";
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  color: #4CAF50;
+  font-weight: bold;
+  font-size: 16px;
+}
+
+.instruction-step {
+  font-weight: 600;
+  font-size: 16px;
+  margin-bottom: 10px;
+  color: #fff;
+}
+
+.instruction-item.completed .instruction-step {
+  color: #4CAF50;
+}
+
+.instruction-item.active .instruction-step {
+  color: #2196F3;
+}
+
+.instruction-description {
+  font-size: 14px;
+  color: #ddd;
+  line-height: 1.6;
+  margin-bottom: 12px;
+  text-align: left;
+}
+
+.instruction-moves {
+  font-size: 13px;
+  color: #aaa;
+  font-family: 'Courier New', monospace;
+  background: rgba(255, 255, 255, 0.08);
+  padding: 10px 15px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  margin-top: 8px;
+}
+
+.instruction-item.active .instruction-moves {
+  background: rgba(33, 150, 243, 0.15);
+  border-color: rgba(33, 150, 243, 0.3);
+  color: #64B5F6;
+}
+
+.instruction-item.completed .instruction-moves {
+  background: rgba(76, 175, 80, 0.15);
+  border-color: rgba(76, 175, 80, 0.3);
+  color: #81C784;
+}
+
+/* Custom scrollbar for instruction guide */
+.instruction-guide::-webkit-scrollbar {
+  width: 8px;
+}
+
+.instruction-guide::-webkit-scrollbar-track {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 4px;
+}
+
+.instruction-guide::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.3);
+  border-radius: 4px;
+}
+
+.instruction-guide::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.5);
+}
+
+/* Different instruction types with color coding */
+.instruction-panel.step-complete {
+  background: linear-gradient(135deg, rgba(76, 175, 80, 0.95), rgba(102, 187, 106, 0.95));
+  border-left: 4px solid #4CAF50;
+}
+
+.instruction-panel.algorithm {
+  background: linear-gradient(135deg, rgba(33, 150, 243, 0.95), rgba(66, 165, 245, 0.95));
+  border-left: 4px solid #2196F3;
+}
+
+.instruction-panel.error {
+  background: linear-gradient(135deg, rgba(244, 67, 54, 0.95), rgba(239, 83, 80, 0.95));
+  border-left: 4px solid #F44336;
+}
+
+/* Pulse animation for important instructions */
+@keyframes pulse {
+  0%, 100% { transform: translateX(-50%) translateY(0) scale(1); }
+  50% { transform: translateX(-50%) translateY(0) scale(1.02); }
+}
+
+.instruction-panel.pulse {
+  animation: slideUp 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94), 
+             pulse 2s ease-in-out infinite 0.5s;
+}
+
+/* Responsive design */
+@media (max-width: 1200px) {
+  .rubiks-cube-container {
+    flex-direction: column;
+    width: 95vw;
+    height: auto;
+    min-height: 90vh;
+    min-width: 600px;
+  }
+  
+  .cube-section {
+    flex: none;
+    width: 100%;
+  }
+  
+  .cube-canvas {
+    height: 45vh;
+    min-height: 350px;
+  }
+  
+  .instruction-guide {
+    flex: none;
+    width: 100%;
+    min-width: auto;
+    max-height: 40vh;
+    min-height: 300px;
+  }
+}
+
+@media (max-width: 768px) {
+  .rubiks-cube-container {
+    width: 98vw;
+    gap: 15px;
+    padding: 10px;
+    min-width: 350px;
+  }
+  
+  .cube-controls {
+    padding: 15px;
+  }
+  
+  .control-buttons {
+    gap: 8px;
+  }
+  
+  .control-buttons button {
+    padding: 10px 14px;
+    font-size: 12px;
+    min-width: 70px;
+  }
+  
+  .step-control-buttons button {
+    padding: 10px 18px;
+    font-size: 14px;
+    min-width: 60px;
+  }
+  
+  .instruction-guide {
+    padding: 20px;
+    min-height: 250px;
+  }
+  
+  .instruction-header h3 {
+    font-size: 18px;
+  }
+  
+  .instruction-item {
+    padding: 15px;
+  }
+  
+  .instruction-step {
+    font-size: 15px;
+  }
+  
+  .instruction-description {
+    font-size: 13px;
+  }
 }

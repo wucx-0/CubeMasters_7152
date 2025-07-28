@@ -12,8 +12,6 @@ const SolvePage = () => {
             <div className="solve-instructions">
               <h3>How to use:</h3>
               <ul>
-                <li>Click "Random Shuffle" to scramble the cube</li>
-                <li>Use "Auto Solve" to see the layer-by-layer solution</li>
                 <li>
                   Use keyboard controls: U/u, D/d, R/r, L/l, F/f, B/b (Uppercase
                   = anticlockwise, lowercase = clockwise)
