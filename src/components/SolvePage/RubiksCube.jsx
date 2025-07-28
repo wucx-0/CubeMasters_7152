@@ -15,7 +15,6 @@ const RubiksCube = () => {
   const [currentMove, setCurrentMove] = useState('-');
   const [moveSequence, setMoveSequence] = useState('-');
   const [errorMessage, setErrorMessage] = useState('');
-  const [nextMoveReady, setNextMoveReady] = useState(false);
   const [stepSolveActive, setStepSolveActive] = useState(false);
   const [moveLog, setMoveLog] = useState('');
 
@@ -63,7 +62,6 @@ const RubiksCube = () => {
         setCurrentMove,
         setMoveSequence,
         setErrorMessage,
-        setNextMoveReady,
         setStepSolveActive,
         setMoveLog 
       });
@@ -137,7 +135,7 @@ const RubiksCube = () => {
         <div className="step-control-buttons">
           <button 
             onClick={handleNextMove}
-            disabled={!nextMoveReady || currentStep === 'Solved!'}
+            disabled={!stepSolveActive || currentStep === 'Solved!' || currentStep === 'Ready'}
           >
             &gt;
           </button>
@@ -193,9 +191,6 @@ class RubiksCubeClass {
     this.stepCount = 0;
     this.currentStep = 1;
     this.minCubeIndex = 101;
-    this.nextMoveQueue = [];
-    this.isStepSolving = false;
-    this.setNextMoveReady = uiCallbacks.setNextMoveReady || (() => {});
     this.setStepSolveActive = uiCallbacks.setStepSolveActive || (() => {});
     
     // Algorithm specific properties
