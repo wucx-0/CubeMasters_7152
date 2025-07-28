@@ -21,9 +21,7 @@
   overflow-y: auto;
   width: 100%;
   max-width: 1100px;
-
 }
-
 
 .search {
   --padding: 14px;
@@ -90,7 +88,7 @@
   grid-template-columns: 100px 120px 60px 380px 100px 100px 100px;
   align-items: center;
   justify-content: center;
-/*  padding-left: 00px;*/
+  /*  padding-left: 00px;*/
 
   /* Typography */
   font-weight: bold;
@@ -174,7 +172,10 @@
 
 /* Smooth shrink/fill effect for favoriting/unfavoriting */
 .learnListItem-wrapper {
-  transition: max-height 0.3s ease, margin 0.3s ease, opacity 0.3s ease;
+  transition:
+    max-height 0.3s ease,
+    margin 0.3s ease,
+    opacity 0.3s ease;
   max-height: 100px;
   margin: 20px 0;
   opacity: 1;
@@ -187,12 +188,14 @@
 }
 
 .learnListItem {
-  transition: transform 0.3s ease, opacity 0.3s ease;
+  transition:
+    transform 0.3s ease,
+    opacity 0.3s ease;
   transform: scale(1);
   opacity: 1;
 }
 
-.learnList{
+.learnList {
   padding-left: 10px;
 }
 
@@ -212,41 +215,48 @@
   white-space: nowrap; /* Keep each step on one line */
 }
 
-ul li span:nth-child(1) { /*cubeimage*/
+ul li span:nth-child(1) {
+  /*cubeimage*/
   width: 100px;
   /*border: 1px solid var(--clr-dark);*/ /* Keep commented unless needed */
 }
 
-ul li span:nth-child(2) { /*algcat*/
+ul li span:nth-child(2) {
+  /*algcat*/
   width: 120px;
   /*border: 1px solid var(--clr-dark);*/ /* Keep commented unless needed */
 }
 
-ul li span:nth-child(3) { /*algid*/
+ul li span:nth-child(3) {
+  /*algid*/
   width: 60px;
   text-align: left;
   /*border: 1px solid var(--clr-dark);*/ /* Keep commented unless needed */
 }
 
-ul li span:nth-child(4) { /*algsteps*/
+ul li span:nth-child(4) {
+  /*algsteps*/
   width: 380px;
   text-align: left;
   /*border: 1px solid var(--clr-dark);*/ /* Keep commented unless needed */
 }
 
-ul li span:nth-child(5) { /*algdescription*/
+ul li span:nth-child(5) {
+  /*algdescription*/
   width: 100px;
   text-align: center;
   /*border: 1px solid var(--clr-dark);*/ /* Keep commented unless needed */
 }
 
-ul li span:nth-child(6) { /*favourite*/
+ul li span:nth-child(6) {
+  /*favourite*/
   width: 120px;
   text-align: center;
   /*border: 1px solid var(--clr-dark);*/ /* Keep commented unless needed */
 }
 
-ul li span:nth-child(7) { /*done*/
+ul li span:nth-child(7) {
+  /*done*/
   width: 100px;
   text-align: center;
   /*border: 1px solid var(--clr-dark);*/ /* Keep commented unless needed */
@@ -257,17 +267,30 @@ ul li span:nth-child(7) { /*done*/
   align-items: center;
   justify-content: center;
   padding-left: 20px;
-  /*border: 1px solid var(--clr-dark);*/  /*Keep commented unless needed*/
+  /*border: 1px solid var(--clr-dark);*/ /*Keep commented unless needed*/
 }
 
 .done {
   display: flex;
   align-items: center;
   justify-content: center;
-  /*border: 1px solid var(--clr-dark);*/  /*Keep commented unless needed*/
+  /*border: 1px solid var(--clr-dark);*/ /*Keep commented unless needed*/
 }
 
 /*end of LearnPage styles*/
+
+/*start of SolvePage styles*/
+
+.rubiks-cube {
+  display: flex;
+  justify-content: center;
+  overflow: hidden;
+
+  transform: scale(0.85); /* shrink to 80% */
+  transform-origin: top center; /* optional: adjust anchor point */
+}
+
+/*end of SolvePage styles*/
 
 /*start of TimerPage styles*/
 
@@ -308,7 +331,7 @@ ul li span:nth-child(7) { /*done*/
 /* Right sidebar */
 .right-sidebar {
   width: 330px;
-/*  padding: 16px;*/
+  /*  padding: 16px;*/
   border-radius: 10px;
   padding: 0px 20px 12px 12px;
   background-color: rgba(128, 128, 128, 0.1);
@@ -416,7 +439,7 @@ ul li span:nth-child(7) { /*done*/
 /*start of SettingsPage styles*/
 
 .settings-container {
-  font-family: 'Lexend', sans-serif;
+  font-family: "Lexend", sans-serif;
   /*border: 1px solid var(--clr-dark);*/ /* Keep commented unless needed */
 }
 
@@ -522,15 +545,13 @@ ul li span:nth-child(7) { /*done*/
 .personalisation-form textarea,
 .personalisation-form .MuiInputBase-input,
 .personalisation-form .MuiFormLabel-root {
-  font-family: 'Lexend', sans-serif !important;
+  font-family: "Lexend", sans-serif !important;
 }
 
 .personalisation-form button {
-  font-family: 'Lexend', sans-serif !important;
+  font-family: "Lexend", sans-serif !important;
 }
 
 /*end of Settings-personalisation styles*/
-
-
 
 /*end of SettingsPage styles*/
