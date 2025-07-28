@@ -27,8 +27,8 @@ const PersonalisationSchema = Yup.object().shape({
     ),
   country: Yup.string().required("Please select your country"),
   description: Yup.string().max(200),
-  experienceLevel: Yup.string().required("Please select your experience level"),
-  mainEvent: Yup.string().required("Please select your main event"),
+  experienceLevel: Yup.string(),
+  mainEvent: Yup.string(),
   goals: Yup.string().max(100),
   favoriteMethods: Yup.string().max(100),
 });
