@@ -176,7 +176,11 @@ function TimerPage() {
   const timerInterval = useRef(null);
 
   useEffect(() => {
-    const solvesRef = ref(db, `solves/${userId}`);
+    const auth = getAuth();
+    const user = auth.currentUser;
+    if (!user) return;
+
+    const solvesRef = ref(db, `solves/${user.uid}`);
 
     const unsubscribe = onValue(solvesRef, (snapshot) => {
       const data = snapshot.val();
@@ -233,6 +237,10 @@ function TimerPage() {
   };
 
   const stopTimer = () => {
+    const auth = getAuth();
+    const user = auth.currentUser;
+    if (!user) return;
+
     clearInterval(timerInterval.current);
 
     const overtime = (Date.now() - state.startTime) / 1000;
@@ -324,6 +332,10 @@ function TimerPage() {
   };
 
   const resetSession = () => {
+    const auth = getAuth();
+    const user = auth.currentUser;
+    if (!user) return;
+
     if (window.confirm("Reset all session solves?")) {
       const userSolvesRef = ref(db, `solves/${userId}`);
       set(userSolvesRef, []) // clears from Firebase
