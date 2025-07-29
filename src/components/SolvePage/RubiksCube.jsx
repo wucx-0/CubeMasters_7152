@@ -2,6 +2,8 @@ import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
 import './RubiksCube.css';
 
+//This page is made with reference to the Threejs_rubik cube project by newbieYang
+//Tutorial source: https://zhuanlan.zhihu.com/p/36304412
 const RubiksCube = () => {
   const mountRef = useRef(null);
   const cubeRef = useRef(null);
