@@ -418,14 +418,14 @@ class RubiksCubeClass {
     if (this.isRotating) return;
     
     switch(this.currentStep) {
-      case 1: this.step1(); break;
-      case 2: this.step2(); break;
-      case 3: this.step3(); break;
-      case 4: this.step4(); break;
-      case 5: this.step5(); break;
-      case 6: this.step6(); break;
-      case 7: this.step7(); break;
-      case 8: this.step8(); break;
+      case 1: this.formWhiteCross(); break;
+      case 2: this.positionWhiteCorners(); break;
+      case 3: this.completeBottomLayer(); break;
+      case 4: this.solveMiddleLayer(); break;
+      case 5: this.formYellowCross(); break;
+      case 6: this.alignCrossEdges(); break;
+      case 7: this.positionYellowCorners(); break;
+      case 8: this.orientYellowCorners(); break;
     }
   }
 
@@ -926,14 +926,14 @@ class RubiksCubeClass {
       } else {
         // Step mode - stop and wait for user
         switch(this.currentStep) {
-          case 1: this.step1(); break;
-          case 2: this.step2(); break;
-          case 3: this.step3(); break;
-          case 4: this.step4(); break;
-          case 5: this.step5(); break;
-          case 6: this.step6(); break;
-          case 7: this.step7(); break;
-          case 8: this.step8(); break;
+          case 1: this.formWhiteCross(); break;
+          case 2: this.positionWhiteCorners(); break;
+          case 3: this.completeBottomLayer(); break;
+          case 4: this.solveMiddleLayer(); break;
+          case 5: this.formYellowCross(); break;
+          case 6: this.alignCrossEdges(); break;
+          case 7: this.positionYellowCorners(); break;
+          case 8: this.orientYellowCorners(); break;
           default: break;
         }
       }
@@ -1311,7 +1311,7 @@ updateCubeIndex(elements) {
 
     // Auto solve main method
     autoSolve() {
-      if (!this.checkStep8() && !this.isRotating) {
+      if (!this.isYellowCornersOriented() && !this.isRotating) {
         console.log('Auto solve mode activated - use > button to proceed step by step');
         this.startTime = performance.now();
         this.stepCount = 0;
@@ -1332,25 +1332,25 @@ updateCubeIndex(elements) {
       }
     }
     determineCurrentStep() {
-      if (this.checkStep7()) {
+      if (this.areYellowCornersPositioned()) {
         this.currentStep = 8;
         this.uiCallbacks.setCurrentStep('Step 8: Final Orient Corners');
-      } else if (this.checkStep6()) {
+      } else if (this.isCrossAligned()) {
         this.currentStep = 7;
         this.uiCallbacks.setCurrentStep('Step 7: Orient Top Edges');
-      } else if (this.checkStep5()) {
+      } else if (this.isYellowCrossFormed()) {
         this.currentStep = 6;
         this.uiCallbacks.setCurrentStep('Step 6: Position Top Corners');
-      } else if (this.checkStep4()) {
+      } else if (this.isMiddleLayerSolved()) {
         this.currentStep = 5;
         this.uiCallbacks.setCurrentStep('Step 5: Top Cross');
-      } else if (this.checkStep3()) {
+      } else if (this.isBottomLayerComplete()) {
         this.currentStep = 4;
         this.uiCallbacks.setCurrentStep('Step 4: Middle Layer');
-      } else if (this.checkStep2()) {
+      } else if (this.areWhiteCornersPositioned()) {
         this.currentStep = 3;
         this.uiCallbacks.setCurrentStep('Step 3: Bottom Corners');
-      } else if (this.checkStep1()) {
+      } else if (this.isWhiteCrossComplete()) {
         this.currentStep = 2;
         this.uiCallbacks.setCurrentStep('Step 2: Bottom Edges');
       } else {
@@ -1360,14 +1360,14 @@ updateCubeIndex(elements) {
     }
 
     // Step 1: White Cross
-      step1() {
-        if (this.checkStep1()) {
+      formWhiteCross() {
+        if (this.isWhiteCrossComplete()) {
           if (this.solveMode === 'auto') {
             console.log('Step 1 complete, starting step 2');
             this.currentStep = 2;
             this.addInstruction('Step 1 Complete', 'White cross formed successfully!', null, true);
             this.addInstruction('Step 2: White Corners', 'Position all white corners correctly');
-            this.step2();
+            this.positionWhiteCorners();
             return;
           } else {
             console.log('Step 1 complete');
@@ -1383,25 +1383,25 @@ updateCubeIndex(elements) {
         this.uiCallbacks.setCurrentStep('Step 1: White Cross');
         this.addInstruction('Step 1: White Cross', 'Form white cross on bottom face with matching edge colors');
 
-      this.step1Case1(0);
-      this.step1Case1(1);
-      this.step1Case1(2);
-      this.step1Case1(3);
+      this.handleSideWhiteEdge(0);
+      this.handleSideWhiteEdge(1);
+      this.handleSideWhiteEdge(2);
+      this.handleSideWhiteEdge(3);
       
-      this.step1Case2(0);
-      this.step1Case2(1);
-      this.step1Case2(2);
-      this.step1Case2(3);
+      this.handleRightWhiteEdge(0);
+      this.handleRightWhiteEdge(1);
+      this.handleRightWhiteEdge(2);
+      this.handleRightWhiteEdge(3);
       
-      this.step1Case3(0);
-      this.step1Case3(1);
-      this.step1Case3(2);
-      this.step1Case3(3);
+      this.handleMiddleWhiteEdge(0);
+      this.handleMiddleWhiteEdge(1);
+      this.handleMiddleWhiteEdge(2);
+      this.handleMiddleWhiteEdge(3);
       
-      this.step1Case4(0);
-      this.step1Case4(1);
-      this.step1Case4(2);
-      this.step1Case4(3);
+      this.handleBottomWhiteEdge(0);
+      this.handleBottomWhiteEdge(1);
+      this.handleBottomWhiteEdge(2);
+      this.handleBottomWhiteEdge(3);
       
       if (!this.isRotating) {
         this.isAutoSolve = false;
@@ -1411,7 +1411,7 @@ updateCubeIndex(elements) {
       }
     }
 
-    checkStep1() {
+    isWhiteCrossComplete() {
     const indexs = [1, 9, 11, 19];
     for (let i = 0; i < indexs.length; i++) {
         const item = this.getCubeByIndex(indexs[i]);
@@ -1423,7 +1423,7 @@ updateCubeIndex(elements) {
     return true;
     }
 
-    step1Case1(rotateNum) {
+    handleSideWhiteEdge(rotateNum) {
       if (!this.isRotating) {
         const cube3 = this.getCubeByIndex(3, rotateNum);
         const cube9 = this.getCubeByIndex(9, rotateNum);
@@ -1443,7 +1443,7 @@ updateCubeIndex(elements) {
       }
     }
 
-    step1Case2(rotateNum) {
+    handleRightWhiteEdge(rotateNum) {
       if (!this.isRotating) {
         const cube5 = this.getCubeByIndex(5, rotateNum);
         const cube11 = this.getCubeByIndex(11, rotateNum);
@@ -1463,7 +1463,7 @@ updateCubeIndex(elements) {
       }
     }
 
-    step1Case3(rotateNum) {
+    handleMiddleWhiteEdge(rotateNum) {
       if (!this.isRotating) {
         const cube15 = this.getCubeByIndex(15, rotateNum);
         const cube9 = this.getCubeByIndex(9, rotateNum);
@@ -1482,7 +1482,7 @@ updateCubeIndex(elements) {
       }
     }
 
-    step1Case4(rotateNum) {
+    handleBottomWhiteEdge(rotateNum) {
       if (!this.isRotating) {
         const cube1 = this.getCubeByIndex(1, rotateNum);
         const cube7 = this.getCubeByIndex(7, rotateNum);
@@ -1504,14 +1504,14 @@ updateCubeIndex(elements) {
     }
 
     // Step 2: Bottom Edges 
-    step2() {
-      if (this.checkStep2()) {
+    positionWhiteCorners() {
+      if (this.areWhiteCornersPositioned()) {
         if (this.solveMode === 'auto') {
           console.log('Step 2 complete, starting step 3');
           this.currentStep = 3;
           this.uiCallbacks.setCurrentStep('Step 3: Bottom Corners');
           this.addInstruction('Step 2 Complete', 'White corners complete! Moving to Step 3: Second layer edges', null, true);
-          this.step3();
+          this.completeBottomLayer();
           return;
         } else {
           console.log('Step 2 complete');
@@ -1527,20 +1527,20 @@ updateCubeIndex(elements) {
       this.uiCallbacks.setCurrentStep('Step 2: Bottom Edges');
       this.addInstruction('Step 2: White Corners', 'Position all white corners correctly');
 
-      this.step2Case1(0);
-      this.step2Case1(1);
-      this.step2Case1(2);
-      this.step2Case1(3);
+      this.handleTopWhiteCorner(0);
+      this.handleTopWhiteCorner(1);
+      this.handleTopWhiteCorner(2);
+      this.handleTopWhiteCorner(3);
       
-      this.step2Case2(0);
-      this.step2Case2(1);
-      this.step2Case2(2);
-      this.step2Case2(3);
+      this.handleBottomRightCorner(0);
+      this.handleBottomRightCorner(1);
+      this.handleBottomRightCorner(2);
+      this.handleBottomRightCorner(3);
       
-      this.step2Case3(0);
-      this.step2Case3(1);
-      this.step2Case3(2);
-      this.step2Case3(3);
+      this.handleBottomLeftCorner(0);
+      this.handleBottomLeftCorner(1);
+      this.handleBottomLeftCorner(2);
+      this.handleBottomLeftCorner(3);
       
       if (!this.isRotating) {
         this.isAutoSolve = false;
@@ -1550,7 +1550,7 @@ updateCubeIndex(elements) {
       }
     }
 
-    checkStep2() {
+    areWhiteCornersPositioned() {
     const indexs = [4, 7, 14, 17, 22, 25, 12, 15];
     const lines = [this.ZLine, this.XLine, this.ZLineAd, this.XLineAd];
     const arr = this.getCubeByIndexs(indexs);
@@ -1594,7 +1594,7 @@ updateCubeIndex(elements) {
     return true;
     }
 
-    step2Case1(rotateNum) {
+    handleTopWhiteCorner(rotateNum) {
       if (!this.isRotating) {
         const cube1 = this.getCubeByIndex(1, rotateNum);
         const cube4 = this.getCubeByIndex(4, rotateNum);
@@ -1612,14 +1612,14 @@ updateCubeIndex(elements) {
             this.updateCurrentStep('White corner colors don\'t match - rotating to find correct position');
             this.u(rotateNum, () => {
               const newRotateNum = (rotateNum + 1) % 4;
-              this.step2Case1(newRotateNum);
+              this.handleTopWhiteCorner(newRotateNum);
             });
           }
         }
       }
     }
 
-    step2Case2(rotateNum) {
+    handleBottomRightCorner(rotateNum) {
       if (!this.isRotating) {
         const cube7 = this.getCubeByIndex(7, rotateNum);
         const cube8 = this.getCubeByIndex(8, rotateNum);
@@ -1649,7 +1649,7 @@ updateCubeIndex(elements) {
       }
     }
 
-    step2Case3(rotateNum) {
+    handleBottomLeftCorner(rotateNum) {
       if (!this.isRotating) {
         const cube7 = this.getCubeByIndex(7, rotateNum);
         const cube6 = this.getCubeByIndex(6, rotateNum);
@@ -1680,14 +1680,14 @@ updateCubeIndex(elements) {
     }
 
     // Step 3: Bottom Corners
-    step3() {
-      if (this.checkStep3()) {
+    completeBottomLayer() {
+      if (this.isBottomLayerComplete()) {
         if (this.solveMode === 'auto') {
           console.log('Step 3 complete, starting step 4');
           this.currentStep = 4;
           this.uiCallbacks.setCurrentStep('Step 4: Middle Layer');
           this.addInstruction('Step 3 Complete', 'Bottom layer complete! Moving to Step 4: Middle layer edges', null, true);
-          this.step4();
+          this.solveMiddleLayer();
           return;
         } else {
           console.log('Step 3 complete');
@@ -1707,11 +1707,11 @@ updateCubeIndex(elements) {
       
       // Try all cases for all rotations
       for (let i = 0; i < 4; i++) {
-        this.step3Case1(i);
-        this.step3Case2(i);
-        this.step3Case3(i);
-        this.step3Case4(i);
-        this.step3Case5(i);
+        this.insertCornerFromTop(i);
+        this.insertCornerViaSide(i);
+        this.repositionCorner(i);
+        this.extractCornerRight(i);
+        this.extractCornerFront(i);
       }
       
       if (!this.isRotating) {
@@ -1722,7 +1722,7 @@ updateCubeIndex(elements) {
       }
     }
 
-    checkStep3() {
+    isBottomLayerComplete() {
     const checkStep3Item = (indexs, line) => {
         if (indexs.length > 0) {
         const arr = this.getCubeByIndexs(indexs);
@@ -1758,7 +1758,7 @@ updateCubeIndex(elements) {
     return result;
     }
 
-    step3Case1(rotateNum, startNum) {
+    insertCornerFromTop(rotateNum, startNum) {
       if (!this.isRotating) {
         const cube2 = this.getCubeByIndex(2, rotateNum);
         const cube4 = this.getCubeByIndex(4, rotateNum);
@@ -1792,14 +1792,14 @@ updateCubeIndex(elements) {
               if (startNum !== newRotateNum) {
                 if (startNum == null || startNum === undefined) {
                   startNum = rotateNum;
-                  this.step3Case1(newRotateNum, startNum);
+                  this.insertCornerFromTop(newRotateNum, startNum);
                 } else {
-                  this.step3Case1(newRotateNum, startNum);
+                  this.insertCornerFromTop(newRotateNum, startNum);
                 }
               } else {
                 const cube2 = this.getCubeByIndex(2, newRotateNum);
                 cube2.skipNext = true;
-                this.step3();
+                this.completeBottomLayer();
               }
             });
           }
@@ -1807,7 +1807,7 @@ updateCubeIndex(elements) {
       }
     }
 
-    step3Case2(rotateNum, startNum) {
+    insertCornerViaSide(rotateNum, startNum) {
       if (!this.isRotating) {
         const xLine = this.rotateAxisByYLine(this.XLine, rotateNum);
         const zLine = this.rotateAxisByYLine(this.ZLine, rotateNum);
@@ -1841,14 +1841,14 @@ updateCubeIndex(elements) {
               if (startNum !== newRotateNum) {
                 if (startNum == null || startNum === undefined) {
                   startNum = rotateNum;
-                  this.step3Case2(newRotateNum, startNum);
+                  this.insertCornerViaSide(newRotateNum, startNum);
                 } else {
-                  this.step3Case2(newRotateNum, startNum);
+                  this.insertCornerViaSide(newRotateNum, startNum);
                 }
               } else {
                 const cube2 = this.getCubeByIndex(2, newRotateNum);
                 cube2.skipNext = true;
-                this.step3();
+                this.completeBottomLayer();
               }
             });
           }
@@ -1856,7 +1856,7 @@ updateCubeIndex(elements) {
       }
     }
 
-    step3Case3(rotateNum, startNum) {
+    repositionCorner(rotateNum, startNum) {
       if (!this.isRotating) {
         const xLine = this.rotateAxisByYLine(this.XLine, rotateNum);
         const zLine = this.rotateAxisByYLine(this.ZLine, rotateNum);
@@ -1894,14 +1894,14 @@ updateCubeIndex(elements) {
               if (startNum !== newRotateNum) {
                 if (startNum == null || startNum === undefined) {
                   startNum = rotateNum;
-                  this.step3Case3(newRotateNum, startNum);
+                  this.repositionCorner(newRotateNum, startNum);
                 } else {
-                  this.step3Case3(newRotateNum, startNum);
+                  this.repositionCorner(newRotateNum, startNum);
                 }
               } else {
                 const cube2 = this.getCubeByIndex(2, newRotateNum);
                 cube2.skipNext = true;
-                this.step3();
+                this.completeBottomLayer();
               }
             });
           }
@@ -1909,7 +1909,7 @@ updateCubeIndex(elements) {
       }
     }
 
-    step3Case4(rotateNum) {
+    extractCornerRight(rotateNum) {
       if (!this.isRotating) {
         const cube8 = this.getCubeByIndex(8, rotateNum);
         const cube17 = this.getCubeByIndex(17, rotateNum);
@@ -1946,7 +1946,7 @@ updateCubeIndex(elements) {
       }
     }
 
-    step3Case5(rotateNum) {
+    extractCornerFront(rotateNum) {
       if (!this.isRotating) {
         const cube8 = this.getCubeByIndex(8, rotateNum);
         const cube4 = this.getCubeByIndex(4, rotateNum);
@@ -1985,14 +1985,14 @@ updateCubeIndex(elements) {
       }
     }
     // Step 4: Middle Layer
-    step4() {
-      if (this.checkStep4()) {
+    solveMiddleLayer() {
+      if (this.isMiddleLayerSolved()) {
         if (this.solveMode === 'auto') {
           console.log('Step 4 complete, starting step 5');
           this.currentStep = 5;
           this.uiCallbacks.setCurrentStep('Step 5: Top Cross');
           this.addInstruction('Step 4 Complete', 'Middle layer complete! Moving to Step 5: Yellow cross formation', null, true);
-          this.step5();
+          this.formYellowCross();
           return;
         } else {
           console.log('Step 4 complete');
@@ -2007,7 +2007,7 @@ updateCubeIndex(elements) {
       
       this.uiCallbacks.setCurrentStep('Step 4: Middle Layer');
       this.addInstruction('Step 4: Middle Layer', 'Position middle layer edges correctly');
-      this.step4Face(this.currentFaceNo);
+      this.processMiddleLayerFace(this.currentFaceNo);
       
       if (!this.isRotating) {
         this.isAutoSolve = false;
@@ -2017,8 +2017,8 @@ updateCubeIndex(elements) {
       }
     }
 
-    checkStep4() {
-    if (!this.checkStep3()) {
+    isMiddleLayerSolved() {
+    if (!this.isBottomLayerComplete()) {
         return false;
     }
     
@@ -2057,7 +2057,7 @@ updateCubeIndex(elements) {
     return true;
     }
 
-    rotate401(rotateNum, next) {
+    rightHandAlgorithm(rotateNum, next) {
       this.uiCallbacks.setCurrentMove('r u r u r U R U R (Right-hand algorithm)');
       this.addInstruction('Step 4.1', 'Applying right-hand algorithm for edge insertion', 'r u r u r U R U R');
       if (rotateNum < 0) {
@@ -2067,7 +2067,7 @@ updateCubeIndex(elements) {
       this.runMethodAtNo(arr, 0, rotateNum, next);
     }
 
-    rotate401Opposite(rotateNum, next) {
+    rightHandOpposite(rotateNum, next) {
       this.uiCallbacks.setCurrentMove('r u r u R U R U R (Right-hand opposite)');
       this.addInstruction('Step 4.1b', 'Applying opposite right-hand algorithm', 'r u r u R U R U R');
       if (rotateNum < 0) {
@@ -2077,7 +2077,7 @@ updateCubeIndex(elements) {
       this.runMethodAtNo(arr, 0, rotateNum, next);
     }
 
-    rotate402(rotateNum, next) {
+    leftHandAlgorithm(rotateNum, next) {
       this.uiCallbacks.setCurrentMove('F U F U F u f u f (Left-hand algorithm)');
       this.addInstruction('Step 4.2', 'Applying left-hand algorithm for edge insertion', 'F U F U F u f u f');
       if (rotateNum < 0) {
@@ -2087,7 +2087,7 @@ updateCubeIndex(elements) {
       this.runMethodAtNo(arr, 0, rotateNum, next);
     }
 
-    rotate402Opposite(rotateNum, next) {
+    leftHandOpposite(rotateNum, next) {
       this.uiCallbacks.setCurrentMove('F U F U f u f u f (Left-hand opposite)');
       this.addInstruction('Step 4.2b', 'Applying opposite left-hand algorithm', 'F U F U f u f u f');
       if (rotateNum < 0) {
@@ -2096,7 +2096,7 @@ updateCubeIndex(elements) {
       const arr = [this.F, this.U, this.F, this.U, this.f, this.u, this.f, this.u, this.f];
       this.runMethodAtNo(arr, 0, rotateNum, next);
     }
-    step4Face(rotateNum) {
+    processMiddleLayerFace(rotateNum) {
     if (!this.isRotating) {
         if (rotateNum > 3) {
         rotateNum = rotateNum - 4;
@@ -2128,12 +2128,12 @@ updateCubeIndex(elements) {
         if (this.getFaceColorByVector(cube3, zLine) !== zLine4Color) {
         if (this.getFaceColorByVector(cube9, this.YLine) === zLine4Color &&
             (this.getFaceColorByVector(cube9, xLineAd) === xLineAd6Color || rotateNum === this.startFaceNo)) {
-            this.rotate402(rotateNum - 1);
+            this.leftHandAlgorithm(rotateNum - 1);
             return;
         } else if (this.getFaceColorByVector(cube9, xLineAd) === zLine4Color &&
             (this.getFaceColorByVector(cube9, this.YLine) === xLineAd6Color || rotateNum === this.startFaceNo)) {
             this.u(0, () => {
-            this.rotate401(rotateNum - 1);
+            this.rightHandAlgorithm(rotateNum - 1);
             });
             return;
         } else if ((this.getFaceColorByVector(cube19, this.YLine) === zLine4Color &&
@@ -2152,32 +2152,32 @@ updateCubeIndex(elements) {
             return;
         } else if (this.getFaceColorByVector(cube5, zLine) === zLine4Color &&
             (this.getFaceColorByVector(cube5, xLine) === xLineAd6Color || rotateNum === this.startFaceNo)) {
-            this.rotate401Opposite(rotateNum);
+            this.rightHandOpposite(rotateNum);
             return;
         } else if (this.getFaceColorByVector(cube3, xLineAd) === zLine4Color &&
             (this.getFaceColorByVector(cube3, zLine) === xLineAd6Color || rotateNum === this.startFaceNo)) {
             const tempNum = rotateNum - 1;
-            this.rotate402(tempNum, () => {
+            this.leftHandAlgorithm(tempNum, () => {
             this.U(tempNum, () => {
-                this.rotate401(tempNum);
+                this.rightHandAlgorithm(tempNum);
             });
             });
             return;
         } else if (this.getFaceColorByVector(cube23, xLine) === zLine4Color &&
             (this.getFaceColorByVector(cube23, zLineAd) === xLineAd6Color || rotateNum === this.startFaceNo)) {
-            this.rotate402Opposite(rotateNum - 3);
+            this.leftHandOpposite(rotateNum - 3);
             return;
         } else if (this.getFaceColorByVector(cube23, zLineAd) === zLine4Color &&
             (this.getFaceColorByVector(cube23, xLine) === xLineAd6Color || rotateNum === this.startFaceNo)) {
-            this.rotate402Opposite(rotateNum - 3);
+            this.leftHandOpposite(rotateNum - 3);
             return;
         } else if (this.getFaceColorByVector(cube5, xLine) === zLine4Color &&
             (this.getFaceColorByVector(cube5, zLine) === xLineAd6Color || rotateNum === this.startFaceNo)) {
-            this.rotate402Opposite(rotateNum);
+            this.leftHandOpposite(rotateNum);
             return;
         } else if ((this.getFaceColorByVector(cube21, xLineAd) === zLine4Color || 
             this.getFaceColorByVector(cube21, zLineAd) === zLine4Color) && rotateNum <= 0) {
-            this.rotate402Opposite(rotateNum - 2);
+            this.leftHandOpposite(rotateNum - 2);
             return;
         }
         }
@@ -2186,12 +2186,12 @@ updateCubeIndex(elements) {
         if (this.getFaceColorByVector(cube5, zLine) !== zLine4Color) {
         if (this.getFaceColorByVector(cube11, this.YLine) === zLine4Color &&
             (this.getFaceColorByVector(cube11, xLine) === xLine14Color || rotateNum !== this.endFaceNo)) {
-            this.rotate401(rotateNum);
+            this.rightHandAlgorithm(rotateNum);
             return;
         } else if (this.getFaceColorByVector(cube11, xLine) === zLine4Color &&
             (this.getFaceColorByVector(cube11, this.YLine) === xLine14Color || rotateNum !== this.endFaceNo)) {
             this.U(0, () => {
-            this.rotate402(rotateNum);
+            this.leftHandAlgorithm(rotateNum);
             });
             return;
         } else if ((this.getFaceColorByVector(cube1, this.YLine) === zLine4Color &&
@@ -2210,19 +2210,19 @@ updateCubeIndex(elements) {
             return;
         } else if (this.getFaceColorByVector(cube5, xLine) === zLine4Color &&
             (this.getFaceColorByVector(cube5, zLine) === xLine14Color || rotateNum !== this.endFaceNo)) {
-            this.rotate402Opposite(rotateNum);
+            this.leftHandOpposite(rotateNum);
             return;
         } else if ((this.getFaceColorByVector(cube21, xLineAd) === zLine4Color || 
             this.getFaceColorByVector(cube21, zLineAd) === zLine4Color) && rotateNum <= 0) {
-            this.rotate402Opposite(rotateNum - 2);
+            this.leftHandOpposite(rotateNum - 2);
             return;
         } else if (this.getFaceColorByVector(cube23, zLineAd) === zLine4Color && 
             rotateNum === this.startFaceNo) {
-            this.rotate402Opposite(rotateNum - 3);
+            this.leftHandOpposite(rotateNum - 3);
             return;
         } else if (this.getFaceColorByVector(cube23, xLine) === zLine4Color &&
             (this.getFaceColorByVector(cube23, zLineAd) === xLine14Color || rotateNum !== this.endFaceNo)) {
-            this.rotate402Opposite(rotateNum - 3);
+            this.leftHandOpposite(rotateNum - 3);
             return;
         }
         }
@@ -2241,19 +2241,19 @@ updateCubeIndex(elements) {
             this.currentFaceNo = 0;
         }
         }
-        this.step4();
+        this.solveMiddleLayer();
     }
     }
 
     // Step 5: Top Cross
-    step5() {
-      if (this.checkStep5()) {
+    formYellowCross() {
+      if (this.isYellowCrossFormed()) {
         if (this.solveMode === 'auto') {
           console.log('Step 5 complete, starting step 6');
           this.currentStep = 6;
           this.uiCallbacks.setCurrentStep('Step 6: Position Top Corners');
           this.addInstruction('Step 5 Complete', 'Yellow cross formed! Moving to Step 6: Align cross edges', null, true);
-          this.step6();
+          this.alignCrossEdges();
           return;
         } else {
           console.log('Step 5 complete');
@@ -2270,9 +2270,9 @@ updateCubeIndex(elements) {
       this.addInstruction('Step 5: Top Cross', 'Form yellow cross on top face');
 
       for (let i = 0; i < 4; i++) {
-        this.step5Case1(i);
-        this.step5Case2(i);
-        this.step5Case3(i);
+        this.handleLShapePattern(i);
+        this.handleLinePattern(i);
+        this.handleDotPattern(i);
       }
       
       if (!this.isRotating) {
@@ -2283,8 +2283,8 @@ updateCubeIndex(elements) {
       }
     }
 
-    checkStep5() {
-    if (!this.checkStep4()) {
+    isYellowCrossFormed() {
+    if (!this.isMiddleLayerSolved()) {
         return false;
     }
     
@@ -2305,21 +2305,21 @@ updateCubeIndex(elements) {
     return true;
     }
 
-    rotate501(rotateNum, next) {
+    crossFormationAlgorithm(rotateNum, next) {
       this.uiCallbacks.setCurrentMove('r u f U F R (Cross formation algorithm)');
       this.addInstruction('Step 5.1', 'Applying cross formation algorithm', 'r u f U F R');
       const arr = [this.r, this.u, this.f, this.U, this.F, this.R];
       this.runMethodAtNo(arr, 0, rotateNum, next);
     }
 
-    rotate502(rotateNum, next) {
+    crossCompletionAlgorithm(rotateNum, next) {
       this.uiCallbacks.setCurrentMove('r f u F U R (Cross completion algorithm)');
     this.addInstruction('Step 5.2', 'Completing cross formation', 'r f u F U R');
       const arr = [this.r, this.f, this.u, this.F, this.U, this.R];
       this.runMethodAtNo(arr, 0, rotateNum, next);
     }
 
-    step5Case1(rotateNum) {
+    handleLShapePattern(rotateNum) {
       if (!this.isRotating) {
         const cube1 = this.getCubeByIndex(1, rotateNum);
         const cube11 = this.getCubeByIndex(11, rotateNum);
@@ -2335,12 +2335,12 @@ updateCubeIndex(elements) {
             this.getFaceColorByVector(cube1, zLine) === this.topColor &&
             this.getFaceColorByVector(cube11, xLine) === this.topColor) {
           this.addInstruction('Step 5.1', 'L-shape pattern detected - forming line', 'r u f U F R');
-              this.rotate501(rotateNum);
+              this.crossFormationAlgorithm(rotateNum);
         }
       }
     }
 
-    step5Case2(rotateNum) {
+    handleLinePattern(rotateNum) {
       if (!this.isRotating) {
         const cube1 = this.getCubeByIndex(1, rotateNum);
         const cube11 = this.getCubeByIndex(11, rotateNum);
@@ -2353,12 +2353,12 @@ updateCubeIndex(elements) {
             this.getFaceColorByVector(cube19, this.YLine) === this.topColor &&
             this.getFaceColorByVector(cube11, xLine) === this.topColor) {
           this.addInstruction('Step 5.2', 'Line pattern detected - forming cross', 'r u f U F R');
-              this.rotate501(rotateNum);
+              this.crossFormationAlgorithm(rotateNum);
         }
       }
     }
 
-    step5Case3(rotateNum) {
+    handleDotPattern(rotateNum) {
       if (!this.isRotating) {
         const cube1 = this.getCubeByIndex(1, rotateNum);
         const cube11 = this.getCubeByIndex(11, rotateNum);
@@ -2370,9 +2370,9 @@ updateCubeIndex(elements) {
             this.getFaceColorByVector(cube1, zLine) === this.topColor &&
             this.getFaceColorByVector(cube11, xLine) === this.topColor) {
           this.addInstruction('Step 5.3', 'Dot pattern detected - creating L-shape first', 'r u f U F R U r f u F U R');
-              this.rotate501(rotateNum, () => {
+              this.crossFormationAlgorithm(rotateNum, () => {
             this.U(rotateNum, () => {
-              this.rotate502(rotateNum);
+              this.crossCompletionAlgorithm(rotateNum);
             });
           });
         }
@@ -2380,14 +2380,14 @@ updateCubeIndex(elements) {
     }
 
     // Step 6: Position Top Corners
-    step6() {
-      if (this.checkStep6()) {
+    alignCrossEdges() {
+      if (this.isCrossAligned()) {
         if (this.solveMode === 'auto') {
           console.log('Step 6 complete, starting step 7');
           this.currentStep = 7;
           this.uiCallbacks.setCurrentStep('Step 7: Orient Top Edges');
           this.addInstruction('Step 6 Complete', 'Cross edges aligned! Moving to Step 7: Position yellow corners', null, true);
-          this.step7();
+          this.positionYellowCorners();
           return;
         } else {
           console.log('Step 6 complete');
@@ -2404,7 +2404,7 @@ updateCubeIndex(elements) {
       this.addInstruction('Step 6: Position Top Corners', 'Align yellow cross edges with side centers');
 
       for (let i = 0; i < 4; i++) {
-        this.step6Case1(i);
+        this.cycleTopEdges(i);
       }
       
       if (!this.isRotating) {
@@ -2415,8 +2415,8 @@ updateCubeIndex(elements) {
       }
     }
 
-    checkStep6() {
-    if (!this.checkStep5()) {
+    isCrossAligned() {
+    if (!this.isYellowCrossFormed()) {
         return false;
     }
     
@@ -2435,28 +2435,28 @@ updateCubeIndex(elements) {
     return true;
     }
 
-    rotate601(rotateNum) {
+    edgeCycleAdjacent(rotateNum) {
       this.uiCallbacks.setCurrentMove('r U L u R U l u (Edge cycle algorithm)');
       this.addInstruction('Step 6.1', 'Cycling edges - adjacent swap pattern', 'r U L u R U l u');
       const arr = [this.r, this.U, this.L, this.u, this.R, this.U, this.l, this.u];
       this.runMethodAtNo(arr, 0, rotateNum);
     }
 
-    rotate602(rotateNum) {
+    edgeCycleOpposite(rotateNum) {
       this.uiCallbacks.setCurrentMove('U L u r U l u R (Edge cycle opposite)');
       this.addInstruction('Step 6.2', 'Cycling edges - opposite swap pattern', 'U L u r U l u R');
       const arr = [this.U, this.L, this.u, this.r, this.U, this.l, this.u, this.R];
       this.runMethodAtNo(arr, 0, rotateNum);
     }
 
-    rotate603(rotateNum) {
+    finetuneEdgePosition(rotateNum) {
       this.uiCallbacks.setCurrentMove('R U r U R U U r (Edge positioning)');
       this.addInstruction('Step 6.3', 'Fine-tuning edge positions', 'R U r U R U U r');
       const arr = [this.R, this.U, this.r, this.U, this.R, this.U, this.U, this.r];
       this.runMethodAtNo(arr, 0, rotateNum);
     }
 
-    step6Case1(rotateNum) {
+    cycleTopEdges(rotateNum) {
       if (!this.isRotating) {
         const cube0 = this.getCubeByIndex(0, rotateNum);
         const cube2 = this.getCubeByIndex(2, rotateNum);
@@ -2467,27 +2467,27 @@ updateCubeIndex(elements) {
         if (this.getFaceColorByVector(cube0, zLine) === this.topColor &&
             this.getFaceColorByVector(cube2, xLine) === this.topColor) {
           this.addInstruction('Step 6.1', 'Adjacent edges need swapping', 'r U L u R U l u');
-              this.rotate601(rotateNum);
+              this.edgeCycleAdjacent(rotateNum);
         } else if (this.getFaceColorByVector(cube2, zLine) === this.topColor &&
                   this.getFaceColorByVector(cube20, xLine) === this.topColor) {
           this.addInstruction('Step 6.2', 'Opposite pattern detected', 'U L u r U l u R');
-                    this.rotate602(rotateNum);
+                    this.edgeCycleOpposite(rotateNum);
         } else if (this.getFaceColorByVector(cube0, zLine) === this.topColor) {
           this.addInstruction('Step 6.3', 'Single edge needs positioning', 'R U r U R U U r');
-          this.rotate603(rotateNum);
+          this.finetuneEdgePosition(rotateNum);
         }
       }
     }
 
     // Step 7: Orient Top Edges
-    step7() {
-      if (this.checkStep7()) {
+    positionYellowCorners() {
+      if (this.areYellowCornersPositioned()) {
         if (this.solveMode === 'auto') {
           console.log('Step 7 complete, starting step 8');
           this.currentStep = 8;
           this.uiCallbacks.setCurrentStep('Step 8: Final Orient Corners');
           this.addInstruction('Step 7 Complete', 'Yellow corners positioned! Moving to Step 8: Orient yellow corners', null, true);
-          this.step8();
+          this.orientYellowCorners();
           return;
         } else {
           console.log('Step 7 complete');
@@ -2504,11 +2504,11 @@ updateCubeIndex(elements) {
       this.addInstruction('Step 7: Orient Top Edges', 'Position all yellow corners in correct locations');
       
       for (let i = 0; i < 4; i++) {
-        this.step7Case1(i);
-        this.step7Case2(i);
+        this.positionCornersPattern1(i);
+        this.positionCornersPattern2(i);
       }
       
-      this.step7Case3();
+      this.rotateTopForCorners();
       
       if (!this.isRotating) {
         this.isAutoSolve = false;
@@ -2518,8 +2518,8 @@ updateCubeIndex(elements) {
       }
     }
 
-    checkStep7() {
-    if (!this.checkStep6()) {
+    areYellowCornersPositioned() {
+    if (!this.isCrossAligned()) {
         return false;
     }
     
@@ -2542,7 +2542,7 @@ updateCubeIndex(elements) {
     return true;
     }
 
-    step7Case1(rotateNum) {
+    positionCornersPattern1(rotateNum) {
     if (!this.isRotating) {
         const cube11 = this.getCubeByIndex(11, rotateNum);
         const cube4 = this.getCubeByIndex(4, rotateNum);
@@ -2585,7 +2585,7 @@ updateCubeIndex(elements) {
     }
     }
 
-    step7Case2(rotateNum) {
+    positionCornersPattern2(rotateNum) {
     if (!this.isRotating) {
         const cube1 = this.getCubeByIndex(1, rotateNum);
         const cube4 = this.getCubeByIndex(4, rotateNum);
@@ -2627,8 +2627,8 @@ updateCubeIndex(elements) {
     }
     }
 
-    step7Case3() {
-    if (!this.isRotating && !this.checkStep7()) {
+    rotateTopForCorners() {
+    if (!this.isRotating && !this.areYellowCornersPositioned()) {
       this.uiCallbacks.setCurrentMove('u (Top clockwise)');
       this.updateCurrentStep('Rotating top to find correct corner pattern');
       this.u(0);
@@ -2636,8 +2636,8 @@ updateCubeIndex(elements) {
     }
 
     // Step 8: Final Orient Corners
-    step8() {
-      if (this.checkStep8()) {
+    orientYellowCorners() {
+      if (this.isYellowCornersOriented()) {
         this.isAutoSolve = false;
         this.setStepSolveActive(false);
         this.endTime = performance.now();
@@ -2655,11 +2655,11 @@ updateCubeIndex(elements) {
       this.addInstruction('Step 8: Final Orient Corners', 'Orient all yellow corners to complete the cube');
       
       for (let i = 0; i < 4; i++) {
-        this.step8Case1(i);
-        this.step8Case2(i);
+        this.orientCornersAlgorithm1(i);
+        this.orientCornersAlgorithm2(i);
       }
       
-      this.step8Case3();
+      this.orientAllCorners();
       
       if (!this.isRotating) {
         this.isAutoSolve = false;
@@ -2669,7 +2669,7 @@ updateCubeIndex(elements) {
       }
     }
 
-    checkStep8() {
+    isYellowCornersOriented() {
     if (!this.cubes || this.cubes.length === 0) {
         return false;
     }
@@ -2706,7 +2706,7 @@ updateCubeIndex(elements) {
     return result;
     }
 
-    rotate801(rotateNum) {
+    cornerOrientationAlgorithm(rotateNum) {
       this.uiCallbacks.setCurrentMove('R R B B R F r B B R f R (Corner orientation)');
       this.addInstruction('Step 8.1', 'Applying final corner orientation algorithm', 'R R B B R F r B B R f R');
       const arr = [
@@ -2716,7 +2716,7 @@ updateCubeIndex(elements) {
       this.runMethodAtNo(arr, 0, rotateNum);
     }
 
-    rotate802(rotateNum) {
+    cornerOrientationAlternative(rotateNum) {
       this.uiCallbacks.setCurrentMove('L L B B l f L B B l F l (Corner orientation alt)');
       this.addInstruction('Step 8.2', 'Applying alternative corner orientation algorithm', 'L L B B l f L B B l F l');
       const arr = [
@@ -2726,7 +2726,7 @@ updateCubeIndex(elements) {
       this.runMethodAtNo(arr, 0, rotateNum);
     }
 
-    step8Case1(rotateNum) {
+    orientCornersAlgorithm1(rotateNum) {
       if (!this.isRotating) {
         const cube2 = this.getCubeByIndex(2, rotateNum);
         const cube20 = this.getCubeByIndex(20, rotateNum);
@@ -2736,12 +2736,12 @@ updateCubeIndex(elements) {
         if (this.getFaceColorByVector(cube2, xLine) === this.getFaceColorByVector(cube20, xLine) &&
             this.getFaceColorByVector(cube2, xLine) !== this.getFaceColorByVector(cube11, xLine)) {
           this.addInstruction('Step 8.1', 'Two corners aligned - applying orientation algorithm', 'R R B B R F r B B R f R');
-          this.rotate801(rotateNum);
+          this.cornerOrientationAlgorithm(rotateNum);
         }
       }
     }
 
-    step8Case2(rotateNum) {
+    orientCornersAlgorithm2(rotateNum) {
       if (!this.isRotating) {
         const cube0 = this.getCubeByIndex(0, rotateNum);
         const cube1 = this.getCubeByIndex(1, rotateNum);
@@ -2757,12 +2757,12 @@ updateCubeIndex(elements) {
             this.getFaceColorByVector(cube0, zLine) !== this.getFaceColorByVector(cube1, zLine) &&
             this.getFaceColorByVector(cube20, xLine) !== this.getFaceColorByVector(cube20, xLine)) {
           this.addInstruction('Step 8.2', 'Complex corner pattern - applying alternative algorithm', 'L L B B l f L B B l F l');
-          this.rotate802(rotateNum);
+          this.cornerOrientationAlternative(rotateNum);
         }
       }
     }
 
-    step8Case3() {
+    orientAllCorners() {
       if (!this.isRotating) {
         const cube0 = this.getCubeByIndex(0);
         const cube2 = this.getCubeByIndex(2);
@@ -2774,7 +2774,7 @@ updateCubeIndex(elements) {
             this.getFaceColorByVector(cube20, this.ZLineAd) !== this.getFaceColorByVector(cube18, this.ZLineAd) &&
             this.getFaceColorByVector(cube18, this.XLineAd) !== this.getFaceColorByVector(cube0, this.XLineAd)) {
           this.addInstruction('Step 8.3', 'All corners need orientation - starting algorithm', 'R R B B R F r B B R f R');
-          this.rotate801(0);
+          this.cornerOrientationAlgorithm(0);
         }
       }
     }
