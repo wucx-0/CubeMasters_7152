@@ -14,7 +14,7 @@ const SolvePage = () => {
               <ul>
                 <li>
                   Use keyboard controls: U/u, D/d, R/r, L/l, F/f, B/b (Uppercase
-                  = anticlockwise, lowercase = clockwise)
+                  = clockwise, lowercase = anticlockwise)
                 </li>
               </ul>
             </div>
