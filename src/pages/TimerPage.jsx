@@ -376,6 +376,9 @@ function TimerPage() {
             ? `${state.inspectionTime}${state.inspectionTime === 0 ? " (+2/DNF)" : ""}`
             : formatTime(state.running ? state.currentTime : 0)}
         </div>
+        <h3 style={{ textAlign: "center", opacity: 0.2 }}>
+          Press spacebar to start/stop timer!
+        </h3>
       </div>
 
       <div className="right-sidebar">
